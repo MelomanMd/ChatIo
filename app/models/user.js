@@ -1,0 +1,65 @@
+var userModel = require('../database').models.user;
+
+var create = (data, callback) => {
+	var newUser = new userModel(data);
+	newUser.save(callback);
+};
+
+var findOne = (data, callback) => {
+	userModel.findOne(data, callback);
+}
+
+var findById = (id, callback) => {
+	if (!callback) {
+		return userModel.findById(id);
+	}
+	userModel.findById(id, callback);
+}
+
+var usersList = function (id) {
+	return userModel.find({_id: { $nin: [ id ] }});
+}
+
+var updateUser = function (id, data, callback) {
+	userModel.updateOne({_id: id}, { $set: data }, callback);
+}
+
+var findOrCreate = (data, callback) => {
+	findOne({'socialId': data.id}, (err, user) => {
+		if (err) {
+            return callback(err);
+        }
+
+        if (user) {
+			return callback(err, user);
+		} else {
+			var userData = {
+				username: data.displayName,
+				socialId: data.id,
+				picture: data.photos[0].value || null
+			};
+
+			create(userData, (err, newUser) => {
+				callback(err, newUser);
+			});
+		}
+	});
+}
+
+var isAuthenticated = (req, res, next) => {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.redirect('/');
+	}
+}
+
+module.exports = { 
+	create, 
+	findOne, 
+	findById, 
+	findOrCreate, 
+	isAuthenticated,
+	usersList,
+	updateUser
+};
