@@ -1,2 +1,0 @@
-# ChatIo
-For chat

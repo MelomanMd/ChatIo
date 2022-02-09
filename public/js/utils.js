@@ -1,31 +1,3 @@
-const jsonFormatter = {
-    stringify: (cipherParams) => {
-        var jsonObj = {
-            ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)
-        };
-
-        if (cipherParams.iv) {
-            jsonObj.iv = cipherParams.iv.toString();
-        }
-
-        return JSON.stringify(jsonObj);
-    },
-
-    parse: (jsonStr) => {
-        var jsonObj = JSON.parse(jsonStr);
-
-        var cipherParams = CryptoJS.lib.CipherParams.create({
-            ciphertext: CryptoJS.enc.Base64.parse(jsonObj.ct)
-        });
-
-        if (jsonObj.iv) {
-            cipherParams.iv = CryptoJS.enc.Hex.parse(jsonObj.iv);
-        }
-
-        return cipherParams;
-    }
-};
-
 const dateTime = (time) => {
     var time = new Date(time);
     var hours = time.getHours();

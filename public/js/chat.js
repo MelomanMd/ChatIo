@@ -1,13 +1,3 @@
-const encryption = {
-    keySize: 256,
-    ivSize: 128,
-    iterations: 100,
-};
-
-const app = {
-    salt: 'FlAjps167IyroqvDwzabJdXshJHnjeVYv79DoZMSOI5eXmy5uy'
-};
-
 const conversations_list_input = document.querySelector('.search input');
 conversations_list_input.addEventListener('input', (e) => {
     const search_value = e.target.value;
@@ -49,11 +39,11 @@ if (message) {
 const chat_container = document.querySelector('.chat-history');
 const preloader = document.querySelector('.preloader');
 
-var connectRoom = (from, to) => {
+var connectRoom = (room) => {
     let loading = false;
     let currentPage = 0;
 
-    var socket = io('/chatroom', {
+    var socket = io('http://localhost:3000', {
         transports: ['websocket'],
         upgrade: false,
         reconnection: false,
@@ -61,28 +51,31 @@ var connectRoom = (from, to) => {
     });
 
     socket.on('connect', () => {
-        socket.emit('joinRoom', User._id, User._id);
+        socket.emit('joinRoom', room);
+        socket.emit('joinRoom', `user-room-${User._id}`);
+
+
+        socket.on('new', (from) => {
+            console.log(from);
+        });
 
         submit.addEventListener('click', () => {
             if (message.value.length) {
-                var encrypted = encrypt(message.value, app.salt);
 
                 var data = {
-                    message: encrypted, 
-                    from: from,
-                    to: to,
+                    room: room,
+                    message: message.value,
+                    from: User._id,
+                    to: Companion._id,
                     date: new Date(),
                     username: User.username
                 };
       
                 socket.emit('newMessage', data);
 
-                data.message = message.value;
-
-
-                renderMessage(data);
-
                 message.value = '';
+                
+                renderMessage(data, true);
 
                 document.querySelector('.chat-history').scrollTop = document.querySelector('.chat-history').scrollHeight;
             }
@@ -90,19 +83,17 @@ var connectRoom = (from, to) => {
 
         let timeout;
         message.addEventListener('keyup', () => {
-            socket.emit('typing', true, to);
+            socket.emit('typing', true, room);
 
             clearTimeout(timeout);
 
             timeout = setTimeout(() => {
-                socket.emit('typing', false, to);
+                socket.emit('typing', false, room);
             }, 5000);
         });
 
         socket.on('receiveMessage', (message) => {
-
-            message.message = decrypt(message.message, app.salt).toString(CryptoJS.enc.Utf8);
-
+            console.log(message);
             renderMessage(message, false);
         });
 
@@ -119,7 +110,8 @@ var connectRoom = (from, to) => {
 
                 const lastMessage = document.querySelector('.chat-history ul > li');
 
-                msg_list.reverse().forEach(message => {
+                
+                msg_list.forEach(message => {
                     renderMessage(message, message.me, 'afterbegin', true);
                 });
 
@@ -137,7 +129,7 @@ var connectRoom = (from, to) => {
                     loading = true;
                     currentPage++;
                     document.querySelector('.preloader').style.display = '';
-                    socket.emit('load_messages', from, to, currentPage);
+                    socket.emit('loadMessages', room, currentPage);
                 }
             }, { passive: true });
         }
@@ -153,15 +145,16 @@ const init = () => {
     });
 
     socket.on('connect', () => {
+
         socket.emit('online', User._id);
 
-        socket.on('user_online', (user) => {
+        socket.on('userOnline', (user) => {
             document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
                 element.innerHTML = '<i class="fa fa-circle online"></i> Online'
             });
         });
 
-        socket.on('user_offline', (user) => {
+        socket.on('userOffline', (user) => {
             document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
                 element.innerHTML = '<i class="fa fa-circle offline"></i> Offline'
             });

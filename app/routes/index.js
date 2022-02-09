@@ -4,6 +4,7 @@ var passport 	= require('passport');
 
 var User = require('../models/user');
 var Chat = require('../models/chat');
+var Room = require('../models/room');
 
 var Utils = require('../helpers/date_helper');
 
@@ -19,46 +20,46 @@ router.get('/', (req, res, next) => {
 	}
 });
 
-router.get('/chat/:id', [User.isAuthenticated, async (req, res, next) => {
+router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 	if (req.isAuthenticated()) {
 		var chatId = req.params.id;
 		var userId = req.user.id;
 
 		if (!chatId || !userId) {
+			res.redirect('/');
+		}
+
+		const room = await Room.findOrCreate([chatId, userId]).then(room => room);
+		if (!room) {
+			res.redirect('/');
 			return;
 		}
 
-		let chatData = {
-			me: await User.findById(userId),
-			he: await User.findById(chatId)
-		};
-
-		const users_list = await User.usersList(req.user._id);
-
-		Chat.findChat(userId, chatId, 0, (err, chat_list) => {
-			if (err) {
-				throw err;
-			}
-
-			var msg_list = [];
-			
-			chat_list.reverse().forEach(item => {
-				var message = {
+		let msg_list = [];
+		await Chat.findChatMessages(room._id, 0).then((messages) => {
+			messages.reverse().forEach((item) => {
+				const message_item = {
 					id: item.id,
 					message: item.message,
 					me: item.from.id === userId,
 					user: item.from,
 					created: Utils.dateTime(item.created)
 				};
-				msg_list.push(message);
 
+				msg_list.push(message_item);
 			});
-	
-			res.render('chat', {
-				users_list,
-				msg_list,
-				chatData
-			});
+		});
+
+		let chatData = {
+			me: await User.findById(userId),
+			he: await User.findById(chatId),
+			usersList: await User.usersList(req.user._id),
+			messages: msg_list,
+			room: room
+		};
+
+		res.render('chat', {
+			chatData
 		});
 
 	}  else {
@@ -66,19 +67,20 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res, next) => {
 	}
 }]);
 
-router.get('/chat', [User.isAuthenticated, async (req, res, next) => {
+router.get('/chat', [User.isAuthenticated, async (req, res) => {
 	if (req.isAuthenticated()) {
-		const users_list = await User.usersList(req.user._id);
-
 		var userId = req.user.id;
+
 		let chatData = {
-			me: await User.findById(userId)
+			me: await User.findById(userId),
+			he: {},
+			usersList: await User.usersList(req.user._id),
+			messages: [],
+			room: {}
 		};
 
 		res.render('chat', {
-			users_list,
-			chatData,
-			msg_list: []
+			chatData
 		});
 
 	} else {

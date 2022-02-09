@@ -3,36 +3,29 @@ var User = require('../models/user');
 var Utils = require('../helpers/date_helper');
 
 var ioEvents = (io) => {
-	io.of('/chatroom').on('connection', (socket) => {
+	io.on('connection', (socket) => {
 
-		socket.on('joinRoom', (room, user) => {
+		socket.on('joinRoom', (room) => {
 			socket.join(room);
-			socket.broadcast.to(room).emit('onlineStatus', user);
 		});
 
 		socket.on('newMessage', (data) => {
-			Chat.create({from: data.from, to: data.to, message: data.message, created: data.date}, (err, message) => {
-				if (err) {
-					throw err;
-				}
-
-				socket.broadcast.to(data.to).emit('receiveMessage', data);
+			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message, created: data.date}, () => {
+				socket.broadcast.to(data.room).emit('receiveMessage', data);
+				console.log(`user-room-${data.to}`);
+				socket.broadcast.to(`user-room-${data.to}`).emit('new', data.from);
 			});
 		});
 
-		socket.on('load_messages', async (from, to, page) => {
-			await Chat.findChat(from, to, page, (err, chat_list) => {
-				if (err) {
-					throw err;
-				}
-
+		socket.on('loadMessages', async (room, page) => {
+			await Chat.findChatMessages(room, page).then(messages => {
 				var msg_list = [];
 
-				chat_list.forEach(item => {
+				messages.forEach(item => {
 					var message = {
 						id: item.id,
 						message: item.message,
-						me: item.from.id === from,
+						me: item.from._id === socket.request.session.passport.user,
 						user: item.from,
 						created: Utils.dateTime(item.created)
 					};
@@ -42,12 +35,11 @@ var ioEvents = (io) => {
 
 				socket.emit('preloadMessages', msg_list);
 			});
-		})
-
-		socket.on('typing', (status, user) => {
-			socket.broadcast.to(user).emit('typing', status);
 		});
 
+		socket.on('typing', (status, room) => {
+			socket.broadcast.to(room).emit('typing', status);
+		});
 
 	});
 }
@@ -65,27 +57,20 @@ var init = (app) => {
 	io.on('connect', (socket) => {
 
 		socket.on('online', (user) => {
-			User.updateUser(user, {online: 'online'}, (err, data) => {
-				if (err) {
-					console.log('Error: ', err);
-				}
-
-				socket.broadcast.emit('user_online', user);
+			User.updateUser(user, {online: 'online'}, () => {
+				socket.broadcast.emit('userOnline', user);
 			});
 		});
 
 		socket.on('disconnect', () => {
 			const user = socket.request.session.passport?.user;
 			if (user) {
-				User.updateUser(user, {online: 'offline'}, (err, data) => {
-					if (err) {
-						console.log('Error: ', err);
-					}
-
-					socket.broadcast.emit('user_offline', user);
+				socket.leave(user);
+				User.updateUser(user, {online: 'offline'}, () => {
+					socket.broadcast.emit('userOffline', user);
 				});
 			}
-			socket.disconnect();
+			// socket.disconnect();
 		});
 
 	});
