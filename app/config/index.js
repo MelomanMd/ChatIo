@@ -1,4 +1,4 @@
-var init = () => {
+const init = () => {
 	return {
         db: {
             username: 'main',

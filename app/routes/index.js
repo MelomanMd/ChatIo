@@ -36,32 +36,27 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 			return;
 		}
 
-		let msg_list = [];
-		await Chat.findChatMessages(room._id, 0).then((messages) => {
-			messages.reverse().forEach(async (item) => {
-				const message_item = {
-					id: item.id,
-					message: item.message,
-					me: item.from.id === userId,
-					user: item.from,
-					created: Utils.dateTime(item.created),
-					image: await Attachment.findOne({message: item.id}).then(image => {
-						if (image && image.name) {
-							return `../../uploads/${image.name}`;
-						}
-					})
-				};
+		const msg_list = await Chat.findChatMessages(room._id, 0);
 
-				msg_list.push(message_item);
-			});
-		});
+		const messages = await Promise.all(msg_list.map(async message => ({
+			id: message.id,
+			message: message.message,
+			me: message.from.id === userId,
+			user: message.from,
+			created: Utils.dateTime(message.created),
+			image: await Attachment.findOne({message: message.id}).then(image => {
+				if (image && image.name) {
+					return `../../uploads/${image.name}`;
+				}
+			})
+		})));
 
 		let chatData = {
 			me: await User.findById(userId),
 			he: await User.findById(chatId),
 			usersList: await User.usersList(req.user._id),
-			messages: msg_list,
-			room: room
+			messages,
+			room
 		};
 
 		res.render('chat', {

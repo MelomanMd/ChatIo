@@ -4,8 +4,8 @@ var ChatSchema = new Mongoose.Schema({
     room: { type: Mongoose.Schema.Types.ObjectId, ref: 'room' },
     from: { type: Mongoose.Schema.Types.ObjectId, ref: 'user' },
     to: { type: Mongoose.Schema.Types.ObjectId, ref: 'user'  },
-    message: { type: String, default: null },
-    created:  { type: String, default: null }
+    message: { type: Mongoose.Schema.Types.String, default: null },
+    created:  { type: Mongoose.Schema.Types.Date, default: Date.now }
 });
 
 

@@ -1,9 +1,8 @@
-const fs = require('fs');
-const path = require('path');
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const Attachment = require('../models/attachtment');
 const dateUtils = require('../helpers/date_helper');
+const fileUtils = require('../helpers/file_helper');
 
 const ioEvents = (io) => {
 	io.on('connection', (socket) => {
@@ -13,21 +12,20 @@ const ioEvents = (io) => {
 		});
 
 		socket.on('newMessage', (data) => {
-			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message, created: data.date}, (error, message) => {
+			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message}, (error, message) => {
 
 				if (error) {
 					console.log(error);
 				}
 
 				if (data.file && data.filename) {
-					const buffer = Buffer.from(data.file);
-					fs.createWriteStream(path.dirname(__dirname) + '../../public/uploads/' + data.filename).write(buffer);
-	
-					Attachment.create({message: message._id, name:  data.filename, created: data.date});
+
+					fileUtils.saveFile(data);
+
+					Attachment.create({message: message._id, name:  data.filename});
 
 					data.image = '../../uploads/' +  data.filename;
 				}
-
 
 				socket.broadcast.to(data.room).emit('receiveMessage', data);
 
@@ -36,29 +34,23 @@ const ioEvents = (io) => {
 		});
 
 		socket.on('loadMessages', async (room, page) => {
+
+			const msg_list = await Chat.findChatMessages(room, 0);
+
+			const messages = await Promise.all(msg_list.map(async message => ({
+				id: message.id,
+				message: message.message,
+				me: message.from.id === socket.request.session.passport?.user,
+				user: message.from,
+				created: Utils.dateTime(message.created),
+				image: await Attachment.findOne({message: message.id}).then(image => {
+					if (image && image.name) {
+						return `../../uploads/${image.name}`;
+					}
+				})
+			})));
 		
-			let msg_list = [];
-			await Chat.findChatMessages(room, page).then((messages) => {
-				messages.reverse().forEach(async (item) => {
-					const message_item = {
-						id: item.id,
-						message: item.message,
-						me: item.from.id === socket.request.session.passport.user,
-						user: item.from,
-						created: dateUtils.dateTime(item.created),
-						image: await Attachment.findOne({message: item.id}).then(image => {
-							if (image && image.name) {
-								return `../../uploads/${image.name}`;
-							}
-						})
-					};
-					msg_list.push(message_item);
-				});
-			});
-
-			console.log(msg_list);
-
-			socket.emit('preloadMessages', msg_list);
+			socket.emit('preloadMessages', messages);
 		});
 
 		socket.on('typing', (status, room) => {

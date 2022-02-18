@@ -106,7 +106,7 @@ var connectRoom = (room) => {
                 setTimeout(() => {
                     renderMessage(data, true);
 
-                    document.querySelector('.chat-history').scrollTop = document.querySelector('.chat-history').scrollHeight;
+                    chat_container.scrollTop = chat_container.scrollHeight;
                 }, 150);
             }
         });
@@ -132,8 +132,8 @@ var connectRoom = (room) => {
 
         socket.on('preloadMessages', (msg_list) => {
             loading = false;
-            console.log(msg_list);
-            document.querySelector('.preloader').style.display = 'none';
+
+            preloader.style.display = 'none';
 
             if (msg_list.length) {
 
@@ -145,8 +145,7 @@ var connectRoom = (room) => {
 
                 lastMessage.scrollIntoView();
 
-                document.querySelector('.chat-history').scrollTop -= 70;
-
+                chat_container.scrollTop -= 70;
             }
         });
 
@@ -156,7 +155,7 @@ var connectRoom = (room) => {
                 if (chat_container.scrollTop === 0) {
                     loading = true;
                     currentPage++;
-                    document.querySelector('.preloader').style.display = '';
+                    preloader.style.display = '';
                     socket.emit('loadMessages', room, currentPage);
                 }
             }, { passive: true });
@@ -203,5 +202,5 @@ const init = () => {
 init();
 
 setTimeout(() => {
-    document.querySelector('.chat-history').scrollTop = document.querySelector('.chat-history').scrollHeight;
+    chat_container.scrollTop = chat_container.scrollHeight;
 }, 50);

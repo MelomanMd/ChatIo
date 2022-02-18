@@ -51,7 +51,7 @@
             <div class="preloader" style="display: none;">Loading</div>
             <ul>
               <% if (chatData.messages.length) { %>
-                <% chatData.messages.forEach((message) => { %>
+                <%  chatData.messages.forEach((message) => { %>
                   <li class="clearfix">
                     <div class="message-data <%= message.me ? 'align-right' : '' %>">
                       <span class="message-data-time" ><%= message.created %></span>
@@ -61,7 +61,7 @@
                       <%= message.message %>
 
                       <% if (message.image) { %>
-                        <div class="message-image"><img src="<%= message.image %>" width="200px" /></div>
+                        <div class="message-image"><img src="<%= message.image %>" width="200px" title="Click to open image" /></div>
                       <% } %>
                     </div>
                   </li>

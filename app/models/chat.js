@@ -5,7 +5,11 @@ const create = (data, callback) => {
 };
 
 const findChatMessages = (room, offset) => {
-	return chatModel.find({ room: room }).sort({'created': -1}).skip(offset * 10).limit(10).populate('from').populate('to');
+	return chatModel.find({ room: room })
+		.sort({_id: 1})
+		.limit(10)
+		.populate('from', '_id username online')
+		.populate('to', '_id username online');
 };
 
 module.exports = { 

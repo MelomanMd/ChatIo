@@ -30,6 +30,7 @@ const appendZero = (obj) => {
     if (obj < 10)  {
         return '0' + obj;
     }
+
     return obj;
 };
 
