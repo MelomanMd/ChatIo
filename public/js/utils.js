@@ -60,7 +60,6 @@ const dayName = (day) => {
 
 
 const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
-
     const message_template = `<li class="clearfix">
             <div class="message-data  ${me ? 'align-right' : ''}">
             <span class="message-data-time" >${ !loaded ? dateTime(message.date) : message.created}</span>
@@ -68,48 +67,26 @@ const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
             </div>
             <div class="message ${me ? 'other-message float-right' : 'my-message'}">
                 ${message.message}
+
+                ${message.image ? '<div class="message-image"><img src="' + message.image + '" width="200px" /></div>' : ''}
             </div>
         </li>`;
 
     document.querySelector('.chat-history ul').insertAdjacentHTML(position, message_template);
 };
 
+const typeInTextarea = (text, el) => {
+    el.setRangeText(
+        text,
+        el.selectionStart,
+        el.selectionEnd,
+        'end'
+    );
+};
 
-const encrypt = (msg, pass) => {
-    var salt = CryptoJS.lib.WordArray.random(128 / 8);
-
-    var key = CryptoJS.PBKDF2(pass, salt, {
-        keySize: encryption.keySize / 32,
-        iterations: encryption.iterations
+const uuid = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
     });
-
-    var iv = CryptoJS.lib.WordArray.random(128 / 8);
-
-    var encrypted = CryptoJS.AES.encrypt(msg, key, {
-      iv: iv, 
-      padding: CryptoJS.pad.Pkcs7,
-      mode: CryptoJS.mode.CBC
-    });
-
-    var transitmessage = salt.toString() + iv.toString() + encrypted.toString();
-    return transitmessage;
-}
-
-const decrypt = (msg, pass) => {
-    var salt = CryptoJS.enc.Hex.parse(msg.substr(0, 32));
-    var iv = CryptoJS.enc.Hex.parse(msg.substr(32, 32))
-    var encrypted = msg.substring(64);
-
-    var key = CryptoJS.PBKDF2(pass, salt, {
-        keySize: encryption.keySize / 32,
-        iterations: encryption.iterations
-    });
-
-    var decrypted = CryptoJS.AES.decrypt(encrypted, key, { 
-      iv: iv, 
-      padding: CryptoJS.pad.Pkcs7,
-      mode: CryptoJS.mode.CBC
-    });
-
-    return decrypted;
 }

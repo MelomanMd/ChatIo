@@ -1,10 +1,11 @@
-var express	 	= require('express');
-var router 		= express.Router();
-var passport 	= require('passport');
+const express	 	= require('express');
+const router 		= express.Router();
+const passport 	= require('passport');
 
-var User = require('../models/user');
-var Chat = require('../models/chat');
-var Room = require('../models/room');
+const User = require('../models/user');
+const Chat = require('../models/chat');
+const Room = require('../models/room');
+const Attachment = require('../models/attachtment');
 
 var Utils = require('../helpers/date_helper');
 
@@ -37,13 +38,18 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 
 		let msg_list = [];
 		await Chat.findChatMessages(room._id, 0).then((messages) => {
-			messages.reverse().forEach((item) => {
+			messages.reverse().forEach(async (item) => {
 				const message_item = {
 					id: item.id,
 					message: item.message,
 					me: item.from.id === userId,
 					user: item.from,
-					created: Utils.dateTime(item.created)
+					created: Utils.dateTime(item.created),
+					image: await Attachment.findOne({message: item.id}).then(image => {
+						if (image && image.name) {
+							return `../../uploads/${image.name}`;
+						}
+					})
 				};
 
 				msg_list.push(message_item);

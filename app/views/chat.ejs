@@ -21,7 +21,7 @@
                     <img src="https://eu.ui-avatars.com/api/?name=<%= user.username %>&background=random" />
                     <div class="about">
                       <div class="name"><%= user.username %></div>
-                      <span class="badge">0</span>
+                      <span class="badge" style="display: none;" title="New messages-">0</span>
                       <div class="status" data-id="<%= user.id %>">
                         <i class="fa fa-circle <%= user.online %>"></i> <%= user.online %>
                       </div>
@@ -59,6 +59,10 @@
                     </div>
                     <div class="message <%= message.me ? 'other-message float-right' : 'my-message' %>">
                       <%= message.message %>
+
+                      <% if (message.image) { %>
+                        <div class="message-image"><img src="<%= message.image %>" width="200px" /></div>
+                      <% } %>
                     </div>
                   </li>
                 <% }) %>
@@ -68,6 +72,11 @@
 
           <% if (chatData.he.id) { %>
             <div class="chat-message clearfix">
+              <div class="emojy-panel" style="display: none;">
+                <emoji-picker class="light"></emoji-picker>
+              </div>
+              <div class="emojy-icon"></div>
+              <div class="file-icon"></div>
               <textarea name="message-to-send" id="message-to-send" placeholder ="Type your message" rows="3"></textarea>
               <div class="typing" style="display: none;">
                 <div class="typing-indicator">
@@ -78,6 +87,10 @@
                 <%= chatData.he.username %> is typing
               </div>
               <button class="send">Send</button>
+              <div class="attachment">
+                <input id="attachment" type="file" style="display: none;">
+                <div class="attached-files"></div>
+              </div>
             </div>
           <% } %>
 
@@ -86,8 +99,10 @@
     </div>
       <script src="/js/chat.js"></script>
       <script src="/js/utils.js"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
       <script>const User = <%- JSON.stringify(chatData.me) %>; </script>
       <% if (chatData.room && chatData.room._id) { %>
+        <script src="/js/attachtments.js"></script>
         <script>const Companion = <%- JSON.stringify(chatData.he) %>; </script>
         <script>connectRoom('<%= chatData.room.id %>');</script>
       <% } %>

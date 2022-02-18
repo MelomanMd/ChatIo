@@ -1,8 +1,11 @@
-var Chat = require('../models/chat');
-var User = require('../models/user');
-var Utils = require('../helpers/date_helper');
+const fs = require('fs');
+const path = require('path');
+const Chat = require('../models/chat');
+const User = require('../models/user');
+const Attachment = require('../models/attachtment');
+const dateUtils = require('../helpers/date_helper');
 
-var ioEvents = (io) => {
+const ioEvents = (io) => {
 	io.on('connection', (socket) => {
 
 		socket.on('joinRoom', (room) => {
@@ -10,31 +13,52 @@ var ioEvents = (io) => {
 		});
 
 		socket.on('newMessage', (data) => {
-			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message, created: data.date}, () => {
+			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message, created: data.date}, (error, message) => {
+
+				if (error) {
+					console.log(error);
+				}
+
+				if (data.file && data.filename) {
+					const buffer = Buffer.from(data.file);
+					fs.createWriteStream(path.dirname(__dirname) + '../../public/uploads/' + data.filename).write(buffer);
+	
+					Attachment.create({message: message._id, name:  data.filename, created: data.date});
+
+					data.image = '../../uploads/' +  data.filename;
+				}
+
+
 				socket.broadcast.to(data.room).emit('receiveMessage', data);
-				console.log(`user-room-${data.to}`);
-				socket.broadcast.to(`user-room-${data.to}`).emit('new', data.from);
+
+				socket.broadcast.emit('notification', data.to, data.from);
 			});
 		});
 
 		socket.on('loadMessages', async (room, page) => {
-			await Chat.findChatMessages(room, page).then(messages => {
-				var msg_list = [];
-
-				messages.forEach(item => {
-					var message = {
+		
+			let msg_list = [];
+			await Chat.findChatMessages(room, page).then((messages) => {
+				messages.reverse().forEach(async (item) => {
+					const message_item = {
 						id: item.id,
 						message: item.message,
-						me: item.from._id === socket.request.session.passport.user,
+						me: item.from.id === socket.request.session.passport.user,
 						user: item.from,
-						created: Utils.dateTime(item.created)
+						created: dateUtils.dateTime(item.created),
+						image: await Attachment.findOne({message: item.id}).then(image => {
+							if (image && image.name) {
+								return `../../uploads/${image.name}`;
+							}
+						})
 					};
-					msg_list.push(message);
-
+					msg_list.push(message_item);
 				});
-
-				socket.emit('preloadMessages', msg_list);
 			});
+
+			console.log(msg_list);
+
+			socket.emit('preloadMessages', msg_list);
 		});
 
 		socket.on('typing', (status, room) => {
@@ -45,7 +69,7 @@ var ioEvents = (io) => {
 }
 
 
-var init = (app) => {
+const init = (app) => {
 
 	var server 	= require('http').Server(app);
 	var io 		= require('socket.io')(server);
@@ -70,7 +94,7 @@ var init = (app) => {
 					socket.broadcast.emit('userOffline', user);
 				});
 			}
-			// socket.disconnect();
+			socket.disconnect();
 		});
 
 	});

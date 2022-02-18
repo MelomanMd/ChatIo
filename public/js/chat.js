@@ -39,6 +39,30 @@ if (message) {
 const chat_container = document.querySelector('.chat-history');
 const preloader = document.querySelector('.preloader');
 
+const emojyButton = document.querySelector('.emojy-icon');
+if (emojyButton) {
+    emojyButton.addEventListener('click', () => {
+        const emojyElement = document.querySelector('.emojy-panel');
+        emojyElement.style.display = emojyElement.style.display === 'none' ? '' : 'none';
+    });
+};
+
+const fileButton = document.querySelector('.file-icon');
+if (fileButton) {
+    fileButton.addEventListener('click', () => {
+        document.querySelector('[type="file"]').click();
+    });
+};
+
+
+const emojyPicker = document.querySelector('emoji-picker');
+if (emojyPicker) {
+    emojyPicker.addEventListener('emoji-click', (e) => {
+        typeInTextarea(e.detail.unicode, message);
+    });
+}
+var activeUser;
+
 var connectRoom = (room) => {
     let loading = false;
     let currentPage = 0;
@@ -51,13 +75,10 @@ var connectRoom = (room) => {
     });
 
     socket.on('connect', () => {
+
+        activeUser = Companion._id;
+
         socket.emit('joinRoom', room);
-        socket.emit('joinRoom', `user-room-${User._id}`);
-
-
-        socket.on('new', (from) => {
-            console.log(from);
-        });
 
         submit.addEventListener('click', () => {
             if (message.value.length) {
@@ -68,16 +89,25 @@ var connectRoom = (room) => {
                     from: User._id,
                     to: Companion._id,
                     date: new Date(),
-                    username: User.username
+                    username: User.username,
                 };
+
+                const file = document.getElementById('attachment').files[0];
+                if (file) {
+                    data.filename = uuid() + '.' + file.name.split('.').pop();
+                    data.file = file;
+                    data.image = '../uploads/' + data.filename;
+                }
       
                 socket.emit('newMessage', data);
 
                 message.value = '';
                 
-                renderMessage(data, true);
+                setTimeout(() => {
+                    renderMessage(data, true);
 
-                document.querySelector('.chat-history').scrollTop = document.querySelector('.chat-history').scrollHeight;
+                    document.querySelector('.chat-history').scrollTop = document.querySelector('.chat-history').scrollHeight;
+                }, 150);
             }
         });
 
@@ -93,7 +123,6 @@ var connectRoom = (room) => {
         });
 
         socket.on('receiveMessage', (message) => {
-            console.log(message);
             renderMessage(message, false);
         });
 
@@ -103,14 +132,13 @@ var connectRoom = (room) => {
 
         socket.on('preloadMessages', (msg_list) => {
             loading = false;
-
+            console.log(msg_list);
             document.querySelector('.preloader').style.display = 'none';
 
             if (msg_list.length) {
 
                 const lastMessage = document.querySelector('.chat-history ul > li');
 
-                
                 msg_list.forEach(message => {
                     renderMessage(message, message.me, 'afterbegin', true);
                 });
@@ -145,6 +173,16 @@ const init = () => {
     });
 
     socket.on('connect', () => {
+
+        socket.on('notification', (to, from) => {
+            if (to === User._id) {
+                if (activeUser != from) {
+                    document.querySelector('[data-id="' + from + '"]').parentNode.querySelector('.badge').innerText = parseInt(document.querySelector('[data-id="' + from + '"]').parentNode.querySelector('.badge').innerText) + 1;
+                    document.querySelector('[data-id="' + from + '"]').parentNode.querySelector('.badge').style.display = '-';
+                }
+            }
+        });
+
 
         socket.emit('online', User._id);
 
