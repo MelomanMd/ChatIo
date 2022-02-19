@@ -1,7 +1,6 @@
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const Attachment = require('../models/attachtment');
-const dateUtils = require('../helpers/date_helper');
 const fileUtils = require('../helpers/file_helper');
 
 const ioEvents = (io) => {
@@ -29,7 +28,9 @@ const ioEvents = (io) => {
 
 				socket.broadcast.to(data.room).emit('receiveMessage', data);
 
-				socket.broadcast.emit('notification', data.to, data.from);
+				const notification = {to: data.to, from: data.from, message: data.message, created: message.created};
+
+				socket.broadcast.emit('notification', notification);
 			});
 		});
 

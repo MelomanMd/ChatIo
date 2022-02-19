@@ -59,7 +59,7 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 			room
 		};
 
-		res.render('chat', {
+		res.render('chats', {
 			chatData
 		});
 
@@ -80,13 +80,30 @@ router.get('/chat', [User.isAuthenticated, async (req, res) => {
 			room: {}
 		};
 
-		res.render('chat', {
+		res.render('chats', {
 			chatData
 		});
 
 	} else {
 		res.redirect('/');
 	}
+}]);
+
+
+router.get('/chats', [User.isAuthenticated, async (req, res) => {
+	var userId = req.user.id;
+
+	let chatData = {
+		me: await User.findById(userId),
+		he: {},
+		usersList: await User.usersList(req.user._id),
+		messages: [],
+		room: {}
+	};
+
+	res.render('chats', {
+		chatData
+	});
 }]);
 
 router.get('/logout', (req, res, next) => {

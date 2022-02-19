@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/new_overrides.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="full-height " style="background-color: rgb(73, 80, 87);">
+
+        <div class="container-fluid h-100">
+
+            <div class="chat-body row overflow-hidden bg-light h-100">
+
+                <div class="col-3 px-0">
+                 <div class="chat-list-container flex-column d-flex pr-4">
+                    <div class="py-2">
+                       <p class="h5 mb-0 py-1 chats-title">Chats</p>
+                    </div>
+
+                    <div class="messages-box flex flex-1">
+                       <div class="list-group rounded-0">
+                            <!--User-->
+                            <% if (chatData.usersList && chatData.usersList.length) { %>
+                                <% chatData.usersList.forEach((user) => { %>
+                                    <div class="chat-list-item d-flex align-items-start rounded" onclick="location.href='/chat/<%= user.id %>';">
+                                        <div class="align-self-center mr-3">
+                                            <div class="rounded-circle <%= user.online === 'online' ? 'bg-success' : 'bg-gray' %>" data-id="<%= user.id %>" style="width: 8px; height: 8px; opacity: 1;"></div>
+                                        </div>
+                                        <div class="align-self-center mr-3">
+                                            <img src="https://eu.ui-avatars.com/api/?name=<%= user.username %>&background=random" class="rounded-circle avatar-xs" style="width: 48px; height: 48px; object-fit: cover;">
+                                        </div>
+                                        <div class="media-body overflow-hidden">
+                                            <h5 class="text-truncate font-size-14 mb-1"><%= user.username %></h5>
+                                            <p class="text-truncate mb-0 last-message-text"></p>
+                                        </div>
+                                        <div class="font-size-11 last-message-date"></div>
+                                    </div>
+                                <% }) %>
+                            <% } %>
+                            <!--User-->
+                       </div>
+                    </div>
+
+                    <div class="row no-gutters align-items-center pl-4 pr-2 pb-3" style="height: inherit; flex: 0 1 0%; min-height: 50px;">
+
+                        <div class="col-8 d-flex align-items-center user-status">
+                            <div class="align-self-center mr-3">
+                              <img src="https://eu.ui-avatars.com/api/?name=<%= chatData.me.username %>&background=random" class="rounded-circle avatar-xs" style="width: 48px; height: 48px; object-fit: cover;">
+                            </div>
+                            <div class="media-body">
+                                <h5 class="font-size-14 mt-0 mb-1"><%= chatData.me.username %></h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-success" style="width: 8px; height: 8px; opacity: 1;"></div>
+                                    <p class="ml-2 text-muted mb-0">Active</p>
+                                </div>
+                            </div>
+                       </div>
+
+                       <div class="col-4 text-danger text-right" style="cursor: pointer;">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor">
+                             <path fill-rule="evenodd" d="M5.578 4.437a5 5 0 1 0 4.922.044l.5-.866a6 6 0 1 1-5.908-.053l.486.875z"></path>
+                             <path fill-rule="evenodd" d="M7.5 8V1h1v7h-1z"></path>
+                          </svg>
+                          Log out
+                       </div>
+                    </div>
+
+                 </div>
+              </div>
+              
+            <div class="col-9 px-0 flex-column bg-white rounded-lg">
+                <% if (chatData.he.id) { %>
+                    <div class="px-4 py-4" style="border-bottom: 1px solid rgb(238, 238, 238);">
+                        <div class="col-8 d-flex align-items-center user-status">
+                            <div class="align-self-center mr-3">
+                                <img src="https://eu.ui-avatars.com/api/?name=<%= chatData.he.username %>&amp;background=random" class="rounded-circle avatar-xs" style="width: 58px; height: 58px; object-fit: cover;">
+                            </div>
+                            <div class="media-body">
+                                <h5 class="font-size-14 mt-0 mb-1"><%= chatData.he.username %></h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-<%= chatData.he.online === 'online' ? 'success' : 'gray' %>" data-id="<%= chatData.he.id %>" style="width: 8px; height: 8px; opacity: 1;"></div>
+                                    <p class="ml-2 text-muted mb-0 online-status"><%= chatData.he.online === 'online' ? 'Active' : 'Not active' %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-box-wrapper position-relative d-flex">
+                        <div class="px-4 pt-5 chat-box position-absolute">
+                            <!--Message-->
+                            <% if (chatData.messages.length) { %>
+                                <%  chatData.messages.forEach((message) => { %>
+                                    <div class="d-flex">
+                                        <% if (message.me) { %>
+                                            <div style="flex: 1 1 0%;"></div>
+                                        <% } %>
+
+                                        <div class="text-<%= message.me ? 'right' : 'left' %> mb-4" style="width: 50%;">
+                                            <div class="conversation-list d-inline-block px-3 py-2" style="border-radius: 12px; background-color: rgba(85, 110, 230, 0.1);">
+                                                <div class="ctext-wrap">
+                                                    <div class="conversation-name text-primary d-flex align-items-center mb-1">
+                                                        <div class="mr-2" style="font-weight: 600; cursor: pointer;"><%= message.user.username %></div>
+                                                        <div class="rounded-circle bg-<%= message.user.online === 'online' ? 'success' : 'gray' %>" style="width: 7px; height: 7px; opacity: 1;"></div>
+                                                    </div>
+                                                    <p class="text-left"><%= message.message %></p>
+                                                    <p class="chat-time mb-0">
+                                                        <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
+                                                            <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path>
+                                                        </svg>
+                                                        <%= message.created %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <% if (!message.me) { %>
+                                            <div style="flex: 1 1 0%;"></div>
+                                        <% } %>
+                                    </div>
+                                <% }) %>
+                            <% } %>
+                            <!--Message-->
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 chat-input-section">
+                        <div class="typing px-3 pb-2" style="display: none;">
+                            <strong><%= chatData.he.username %></strong> is typing now <div class="typing-indicator"><span></span><span></span><span></span></div>
+                        </div>
+                        <form class="row">
+                            <div class="col">
+                                <div class="position-relative">
+                                    <div class="emojy-icon"></div>
+                                    <div class="file-icon"></div>
+                                    <input type="text" placeholder="Enter Message..." class="form-control chat-input" value="">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary btn-rounded chat-send w-md">
+                                    <span class="d-none d-sm-inline-block mr-2">Send</span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" tabindex="-1">
+                                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                        <div class="emojy-panel" style="display: none;">
+                            <emoji-picker class="light"></emoji-picker>
+                        </div>
+                        <div class="attachment pt-4 ml-2">
+                            <input id="attachment" type="file" style="display: none;">
+                            <div class="attached-files"></div>
+                        </div>
+                    <% } %>
+                </div>
+              </div>
+           </div>
+        </div>
+     </div>
+    <script src="/js/chat.js"></script>
+    <script src="/js/utils.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <script>const User = <%- JSON.stringify(chatData.me) %>; </script>
+    <% if (chatData.room && chatData.room._id) { %>
+        <script src="/js/attachtments.js"></script>
+        <script>const Companion = <%- JSON.stringify(chatData.he) %>; </script>
+        <script>connectRoom('<%= chatData.room.id %>');</script>
+    <% } %>
+</body>
+</html>
