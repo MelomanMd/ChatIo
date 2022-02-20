@@ -1,3 +1,4 @@
+const imageDiv = document.querySelector('.attachment');
 const image = document.getElementById('attachment');
 if (image) {
     image.addEventListener('change', (e) => {
@@ -7,9 +8,8 @@ if (image) {
         reader.onload = () => {
             var dataURL = reader.result;
             var output = document.querySelector('.attached-files');
-            var preview = document.getElementById('preview');
-            if (preview) {
-                preview.src = dataURL;
+            if (document.getElementById('preview')) {
+                document.getElementById('preview').src = dataURL;
             } else {
                 const img = document.createElement('img');
                 img.id = 'preview';
@@ -17,7 +17,21 @@ if (image) {
                 img.src = dataURL;
                 output.appendChild(img);
             }
+            imageDiv.style.display = '';
         };
         reader.readAsDataURL(input.files[0]);
     });
 }
+
+const clearFile = document.querySelector('.clear-file');
+clearFile.addEventListener('click', () => clearFileInput());
+
+const clearFileInput = () => {
+    if (image.value) {
+        image.value = '';
+        if (document.getElementById('preview')) {
+            document.getElementById('preview').remove();
+        }
+        imageDiv.style.display = 'none';
+    }
+};

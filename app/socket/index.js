@@ -2,6 +2,11 @@ const Chat = require('../models/chat');
 const User = require('../models/user');
 const Attachment = require('../models/attachtment');
 const fileUtils = require('../helpers/file_helper');
+const dateUtils = require('../helpers/date_helper');
+const {
+	ObjectId
+  } = require('mongodb');
+
 
 const ioEvents = (io) => {
 	io.on('connection', (socket) => {
@@ -34,16 +39,16 @@ const ioEvents = (io) => {
 			});
 		});
 
-		socket.on('loadMessages', async (room, page) => {
+		socket.on('loadMessages', async (room, id) => {
 
-			const msg_list = await Chat.findChatMessages(room, 0);
+			const msg_list = await Chat.findChatMessages(room, id);
 
 			const messages = await Promise.all(msg_list.map(async message => ({
 				id: message.id,
 				message: message.message,
 				me: message.from.id === socket.request.session.passport?.user,
 				user: message.from,
-				created: Utils.dateTime(message.created),
+				created: dateUtils.dateTime(message.created),
 				image: await Attachment.findOne({message: message.id}).then(image => {
 					if (image && image.name) {
 						return `../../uploads/${image.name}`;

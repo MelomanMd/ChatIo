@@ -1,7 +1,7 @@
 var Mongoose = require('mongoose');
 
 var AttachtmentsSchema = new Mongoose.Schema({
-    message: { type: Mongoose.Schema.Types.ObjectId, ref: 'chat' },
+    message: { type: Mongoose.Schema.Types.ObjectId, index: true, ref: 'chat' },
     name: { type: Mongoose.Schema.Types.String },
     created:  { type: Mongoose.Schema.Types.Date, default: Date.now }
 });

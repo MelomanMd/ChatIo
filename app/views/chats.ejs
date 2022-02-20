@@ -18,8 +18,8 @@
 
             <div class="chat-body row overflow-hidden bg-light h-100">
 
-                <div class="col-xl-2 col-lg-3 col-sm-4 px-0">
-                 <div class="chat-list-container flex-column d-flex pr-4">
+                <div class="col-xl-2 col-lg-3 col-sm-4 px-0 chat-list">
+                 <div class="chat-list-container flex-column d-flex pr-2 pl-2">
                     <div class="py-2">
                        <p class="h5 mb-0 py-1 chats-title">Chats</p>
                     </div>
@@ -48,7 +48,7 @@
                        </div>
                     </div>
 
-                    <div class="row no-gutters align-items-center pl-4 pr-2 pb-3" style="height: inherit; flex: 0 1 0%; min-height: 50px;">
+                    <div class="row no-gutters align-items-center mb-3 pl-1 pr-1" style="height: inherit; flex: 0 1 0%; min-height: 50px;">
 
                         <div class="col-8 d-flex align-items-center user-status">
                             <div class="align-self-center mr-3">
@@ -63,7 +63,7 @@
                             </div>
                        </div>
 
-                       <div class="col-4 text-danger text-right" style="cursor: pointer;">
+                       <div class="col-4 text-danger text-right logout" style="cursor: pointer;">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor">
                              <path fill-rule="evenodd" d="M5.578 4.437a5 5 0 1 0 4.922.044l.5-.866a6 6 0 1 1-5.908-.053l.486.875z"></path>
                              <path fill-rule="evenodd" d="M7.5 8V1h1v7h-1z"></path>
@@ -93,16 +93,24 @@
                     </div>
 
                     <div class="chat-box-wrapper position-relative d-flex">
+                        <div class="col-12 preloader pt-4 pb-4 text-center">Loading</div>
                         <div class="px-4 pt-5 chat-box position-absolute">
                             <!--Message-->
                             <% if (chatData.messages.length) { %>
                                 <%  chatData.messages.forEach((message) => { %>
-                                    <div class="d-flex">
+                                    <div class="d-flex message-item" data-message-id="<%= message.id %>">
                                         <% if (message.me) { %>
                                             <div style="flex: 1 1 0%;"></div>
                                         <% } %>
 
-                                        <div class="text-<%= message.me ? 'right' : 'left' %> mb-4" style="width: 50%;">
+                                        <div class="text-<%= message.me ? 'right' : 'left' %> mb-4" style="width: 100%;">
+                                            <!--Selected icon-->
+                                            <div class="im-mess--check fl_l">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                                                    <path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 118 1a7 7 0 010 14zM6 7.94a.75.75 0 10-1 1.12l1.46 1.3c.44.38 1.1.33 1.49-.1l.04-.05 2.9-3.75a.75.75 0 10-1.19-.92L7.1 8.91 6 7.94z"></path>
+                                                </svg>
+                                            </div>
+                                            <!--Selected icon-->
                                             <div class="conversation-list d-inline-block px-3 py-2" style="border-radius: 12px; background-color: rgba(85, 110, 230, 0.1);">
                                                 <div class="ctext-wrap">
                                                     <div class="conversation-name text-primary d-flex align-items-center mb-1">
@@ -110,6 +118,9 @@
                                                         <div class="rounded-circle bg-<%= message.user.online === 'online' ? 'success' : 'gray' %>" style="width: 7px; height: 7px; opacity: 1;"></div>
                                                     </div>
                                                     <p class="text-left"><%= message.message %></p>
+                                                    <% if (message.image) { %>
+                                                        <p class="text-left"><img src="<%= message.image %>" width="200px" title="Click to open image" /></p>
+                                                    <% } %>
                                                     <p class="chat-time mb-0">
                                                         <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
                                                             <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
@@ -138,9 +149,11 @@
                         <form class="row">
                             <div class="col">
                                 <div class="position-relative">
-                                    <div class="emojy-icon"></div>
-                                    <div class="file-icon"></div>
-                                    <input type="text" placeholder="Enter Message..." class="form-control chat-input" value="">
+                                    <div class="icons">
+                                        <div class="emojy-icon"></div>
+                                        <div class="file-icon"></div>
+                                    </div>
+                                    <textarea class="form-control chat-input" style="height: 37px;" placeholder="Type your message..."></textarea>
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -155,7 +168,8 @@
                         <div class="emojy-panel" style="display: none;">
                             <emoji-picker class="light"></emoji-picker>
                         </div>
-                        <div class="attachment pt-4 ml-2">
+                        <div class="attachment pt-4 ml-2" style="display: none;">
+                            <span class="clear-file">X</span>
                             <input id="attachment" type="file" style="display: none;">
                             <div class="attached-files"></div>
                         </div>

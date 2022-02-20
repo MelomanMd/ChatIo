@@ -38,7 +38,7 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 
 		const msg_list = await Chat.findChatMessages(room._id, 0);
 
-		const messages = await Promise.all(msg_list.map(async message => ({
+		const messages = await Promise.all(msg_list.reverse().map(async message => ({
 			id: message.id,
 			message: message.message,
 			me: message.from.id === userId,

@@ -1,24 +1,4 @@
-// const conversations_list_input = document.querySelector('.search input');
-// conversations_list_input.addEventListener('input', (e) => {
-//     const search_value = e.target.value;
-//     if (search_value.length > 0) {
-//         document.querySelectorAll('.list li').forEach((item) => {
-//             if (!item.textContent.toLowerCase().includes(search_value.toLowerCase())) {
-//                 item.style.display = 'none';
-//             } else {
-//                 item.style.display = '';
-//             }
-//         });
-//     } else {
-//         document.querySelectorAll('.list li').forEach((item) => {
-//             if (item.style.display === 'none') {
-//                 item.style.display = '';
-//             }
-//         });
-//     }
-// });
-
-const logoutButton = document.querySelector('.fa-close');
+const logoutButton = document.querySelector('.logout');
 if (logoutButton) {
     logoutButton.addEventListener('click', () => {
         location.href = '/logout';
@@ -74,7 +54,7 @@ const scrollEvents = () => {
 
 var connectRoom = (room) => {
     let loading = false;
-    let currentPage = 0;
+    let countMessages = 10;
 
     var socket = io('http://localhost:3000', {
         transports: ['websocket'],
@@ -102,17 +82,20 @@ var connectRoom = (room) => {
                     username: User.username,
                 };
 
-                // const file = document.getElementById('attachment').files[0];
-                // if (file) {
-                //     data.filename = uuid() + '.' + file.name.split('.').pop();
-                //     data.file = file;
-                //     data.image = '../uploads/' + data.filename;
-                // }
-      
+                const file_input = document.getElementById('attachment');
+                if (file_input.files[0]) {
+                    data.filename = uuid() + '.' + file_input.files[0].name.split('.').pop();
+                    data.file = file_input.files[0];
+                    data.image = '../uploads/' + data.filename;
+
+                    clearFileInput();
+                }
+
                 socket.emit('newMessage', data);
 
                 message.value = '';
-                
+                message.style.height = '37px';
+
                 setTimeout(() => {
                     renderMessage(data, true);
 
@@ -121,7 +104,20 @@ var connectRoom = (room) => {
             }
         });
 
+
+        document.querySelectorAll('.message-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.querySelector('.mb-4').classList.toggle('selected');
+            }, false);
+        });
+
         let timeout;
+
+        message.addEventListener('input', () => {
+            message.style.height = '';
+            message.style.height = Math.min(message.scrollHeight, 120) + 'px';
+        });
+
         message.addEventListener('keyup', () => {
             socket.emit('typing', true, room);
 
@@ -129,7 +125,7 @@ var connectRoom = (room) => {
 
             timeout = setTimeout(() => {
                 socket.emit('typing', false, room);
-            }, 30000000);
+            }, 4000);
         });
 
         socket.on('receiveMessage', (message) => {
@@ -145,9 +141,11 @@ var connectRoom = (room) => {
 
             preloader.style.display = 'none';
 
-            if (msg_list.length) {
+            countMessages = msg_list.length;
 
-                const lastMessage = document.querySelector('.chat-history ul > li');
+
+            if (msg_list.length) {
+                const lastMessage = document.querySelector('.chat-box > .d-flex');
 
                 msg_list.forEach(message => {
                     renderMessage(message, message.me, 'afterbegin', true);
@@ -159,14 +157,18 @@ var connectRoom = (room) => {
             }
         });
 
-
-        if (!loading) {
+        if (!loading && countMessages >= 10) {
             chat_container.addEventListener('scroll', () => {
-                if (chat_container.scrollTop === 0) {
-                    loading = true;
-                    currentPage++;
-                    preloader.style.display = '';
-                    socket.emit('loadMessages', room, currentPage);
+                if (countMessages >= 10) {
+                    if (chat_container.scrollTop === 0) {
+                        loading = true;
+    
+                        var lastMsgItem = document.querySelector('.chat-box > .d-flex').dataset.messageId;
+    
+                        preloader.style.display = '';
+    
+                        socket.emit('loadMessages', room, lastMsgItem);
+                    }
                 }
             }, { passive: true });
         }

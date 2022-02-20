@@ -61,10 +61,10 @@ const dayName = (day) => {
 
 
 const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
-    const message_template = `<div class="d-flex">
+    const message_template = `<div class="d-flex message-item" data-message-id="${message.id}">
         ${me ? '<div style="flex: 1 1 0%;"></div>' : ''}
 
-        <div class="text-${me ? 'right' : 'left'} mb-4" style="width: 50%;">
+        <div class="text-${me ? 'right' : 'left'} mb-4" style="width: 100%;">
             <div class="conversation-list d-inline-block px-3 py-2" style="border-radius: 12px; background-color: rgba(85, 110, 230, 0.1);">
                 <div class="ctext-wrap">
                     <div class="conversation-name text-primary d-flex align-items-center mb-1">
@@ -72,6 +72,9 @@ const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
                         <div class="rounded-circle bg-success" style="width: 7px; height: 7px; opacity: 1;"></div>
                     </div>
                     <p class="text-left">${message.message}</p>
+
+                    ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
+
                     <p class="chat-time mb-0">
                         <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
