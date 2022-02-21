@@ -18,5 +18,8 @@
     "socket.io": "^4.4.1",
     "socket.io-redis": "^6.1.1",
     "winston": "^3.3.3"
+  },
+  "scripts": {
+    "start": "node app.js"
   }
 }
