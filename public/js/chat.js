@@ -56,7 +56,7 @@ var connectRoom = (room) => {
     let loading = false;
     let countMessages = 10;
 
-    var socket = io('http://localhost:3000', {
+    var socket = io('https://melomanschat.azurewebsites.net:3000', {
         transports: ['websocket'],
         upgrade: false,
         reconnection: false,
