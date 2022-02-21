@@ -10,7 +10,7 @@ var session 	= require('./app/session');
 var passport    = require('./app/auth');
 var ioServer 	= require('./app/socket')(app);
 
-var port = 3010;
+var port = process.env.PORT || 3010;
 app.set('views', path.join(__dirname, 'app/views'));
 app.set('view engine', 'ejs');
 
@@ -32,4 +32,6 @@ app.use((req, res, next) => {
 });
 
 
-ioServer.listen(port);
+ioServer.listen(port, '0.0.0.0', () => {
+  console.log('Inited on: ', port);
+});

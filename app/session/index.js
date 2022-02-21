@@ -4,7 +4,7 @@ var config 		= require('../config');
 var init = () => {
     return session({
         secret: config.sessionSecret,
-        resave: false,
+        resave: true,
         unset: 'destroy',
         saveUninitialized: true
     });
