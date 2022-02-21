@@ -28,7 +28,7 @@ const ioEvents = (io) => {
 
 					Attachment.create({message: message._id, name:  data.filename});
 
-					data.image = '../../uploads/' +  data.filename;
+					data.image = '/uploads/' +  data.filename;
 				}
 
 				socket.broadcast.to(data.room).emit('receiveMessage', data);
@@ -51,7 +51,7 @@ const ioEvents = (io) => {
 				created: dateUtils.dateTime(message.created),
 				image: await Attachment.findOne({message: message.id}).then(image => {
 					if (image && image.name) {
-						return `../../uploads/${image.name}`;
+						return `/uploads/${image.name}`;
 					}
 				})
 			})));
