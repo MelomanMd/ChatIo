@@ -86,7 +86,7 @@ var connectRoom = (room) => {
                 if (file_input.files[0]) {
                     data.filename = uuid() + '.' + file_input.files[0].name.split('.').pop();
                     data.file = file_input.files[0];
-                    data.image = '../uploads/' + data.filename;
+                    data.image = '/uploads/' + data.filename;
 
                     clearFileInput();
                 }
