@@ -232,7 +232,7 @@ span.pseudo-link:hover {
 
 .form-control {
     display: inline-block;
-    width: 95%;
+    width: 100%;
     height: calc(1.5em + 0.94rem + 2px);
     padding: 7.5px 12px;
     font-size: 13px;
@@ -326,7 +326,7 @@ span.pseudo-link:hover {
 .icons {
     display: block;
     position: absolute;
-    right: 0px;
+    right: 6px;
     top: 6px;
 }
 
@@ -359,10 +359,16 @@ span.pseudo-link:hover {
 
 .clear-file {
     position: relative;
-    left: 85px;
-    top: 15px;
-    font-weight: bold;
+    left: 60px;
+    top: 20px;
+    width: 20px;
+    height: 20px;
     font-size: 14px;
+    background-color: rgba(0, 0, 0, .8);
+    color: #fff;
+    z-index: 50;
+    display: block;
+    text-align: center;
 }
 
 .selected {
@@ -390,7 +396,6 @@ span.pseudo-link:hover {
     width: 17px;
     height: 17px;
     top: 8px;
-    /* display: none; */
     position: absolute;
     color: #5181b8;
 }
@@ -399,4 +404,8 @@ span.pseudo-link:hover {
     margin-top: -2px;
     width: 18px;
     height: 18px;
+}
+
+.logout:hover {
+    color: red !important;
 }

@@ -63,7 +63,7 @@
                             </div>
                        </div>
 
-                       <div class="col-4 text-danger text-right logout" style="cursor: pointer;">
+                       <div class="col-4 text-right logout" style="cursor: pointer;">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor">
                              <path fill-rule="evenodd" d="M5.578 4.437a5 5 0 1 0 4.922.044l.5-.866a6 6 0 1 1-5.908-.053l.486.875z"></path>
                              <path fill-rule="evenodd" d="M7.5 8V1h1v7h-1z"></path>
@@ -141,7 +141,6 @@
                             <!--Message-->
                         </div>
                     </div>
-                    
                     <div class="p-3 chat-input-section">
                         <div class="typing px-3 pb-2" style="display: none;">
                             <strong><%= chatData.he.username %></strong> is typing now <div class="typing-indicator"><span></span><span></span><span></span></div>
@@ -168,13 +167,13 @@
                         <div class="emojy-panel" style="display: none;">
                             <emoji-picker class="light"></emoji-picker>
                         </div>
-                        <div class="attachment pt-4 ml-2" style="display: none;">
+                        <div class="attachment ml-1" style="display: none;">
                             <span class="clear-file">X</span>
                             <input id="attachment" type="file" style="display: none;">
                             <div class="attached-files"></div>
                         </div>
+                    </div>
                     <% } %>
-                </div>
               </div>
            </div>
         </div>
