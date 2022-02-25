@@ -108,4 +108,27 @@ const uuid = () => {
         var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
         return v.toString(16);
     });
-}
+};
+
+const showSelectedMessages = (type = 'add') => {
+    const selectedMessages = document.querySelector('.count');
+    if (type === 'add') {
+        selectedMessagesContainer.classList.remove('d-none');
+        selectedMessagesContainer.classList.add('d-flex');
+
+        userStatusContainer.classList.remove('d-flex');
+        userStatusContainer.classList.add('d-none');
+
+        selectedMessages.innerText = parseInt(selectedMessages.innerText) + 1;
+    } else {
+        if ((parseInt(selectedMessages.innerText) - 1) <= 0) {
+            selectedMessagesContainer.classList.remove('d-flex');
+            selectedMessagesContainer.classList.add('d-none');
+            
+            userStatusContainer.classList.remove('d-none');
+            userStatusContainer.classList.add('d-flex');
+        }
+
+        selectedMessages.innerText = parseInt(selectedMessages.innerText) - 1;
+    }
+};

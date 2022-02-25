@@ -409,3 +409,24 @@ span.pseudo-link:hover {
 .logout:hover {
     color: red !important;
 }
+
+.selected-buttons > button {
+    background-color: #5181b8;
+    border-radius: 3px;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+}
+
+.selected-buttons > button:hover,
+.clear-selected:hover {
+    opacity: .88;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.clear-selected {
+    font-weight: bold;
+    font-size: 16px;
+    vertical-align: middle;
+}

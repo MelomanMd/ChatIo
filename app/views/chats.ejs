@@ -78,7 +78,7 @@
             <div class="col-xl-10 col-lg-9 col-sm-8 px-0 flex-column bg-white rounded-lg">
                 <% if (chatData.he.id) { %>
                     <div class="px-4 py-4" style="border-bottom: 1px solid rgb(238, 238, 238);">
-                        <div class="col-8 d-flex align-items-center user-status">
+                        <div class="col-8 d-flex align-items-center user-status user-status-conversation">
                             <div class="align-self-center mr-3">
                                 <img src="https://eu.ui-avatars.com/api/?name=<%= chatData.he.username %>&amp;background=random" class="rounded-circle avatar-xs" style="width: 58px; height: 58px; object-fit: cover;">
                             </div>
@@ -87,6 +87,17 @@
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-<%= chatData.he.online === 'online' ? 'success' : 'gray' %>" data-id="<%= chatData.he.id %>" style="width: 8px; height: 8px; opacity: 1;"></div>
                                     <p class="ml-2 text-muted mb-0 online-status"><%= chatData.he.online === 'online' ? 'Active' : 'Not active' %></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-none align-items-center selected-messages mt-2">
+                            <div class="col-3">
+                                <span class="count mr-1">0</span> message selected
+                                <span class="ml-1 clear-selected">X</span>
+                            </div>
+                            <div class="col-9 text-right">
+                                <div class="selected-buttons">
+                                    <button>Remove selected</button>
                                 </div>
                             </div>
                         </div>

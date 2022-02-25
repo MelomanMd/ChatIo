@@ -42,8 +42,10 @@ if (emojyPicker) {
     });
 }
 
-var activeUser;
+const selectedMessagesContainer = document.querySelector('.selected-messages');
+const userStatusContainer = document.querySelector('.user-status-conversation');
 
+var activeUser;
 
 const scrollEvents = () => {
     const scrolled = Math.abs((chat_container.scrollTop + chat_container.clientHeight) - chat_container.scrollHeight);
@@ -107,7 +109,11 @@ var connectRoom = (room) => {
 
         document.querySelectorAll('.message-item').forEach(item => {
             item.addEventListener('click', () => {
+
+                showSelectedMessages(item.querySelector('.mb-4').classList.contains('selected') ? 'remove' : 'add');
+
                 item.querySelector('.mb-4').classList.toggle('selected');
+
             }, false);
         });
 
@@ -143,7 +149,6 @@ var connectRoom = (room) => {
 
             countMessages = msg_list.length;
 
-
             if (msg_list.length) {
                 const lastMessage = document.querySelector('.chat-box > .d-flex');
 
@@ -175,7 +180,17 @@ var connectRoom = (room) => {
     });
 }
 
-const init = () => {
+setTimeout(() => {
+    chat_container.scrollTop = chat_container.scrollHeight;
+
+    document.onclick = (e) => {
+        if (!e.target.classList.contains('emojy-icon')) {
+            if (document.querySelector('.emojy-panel').style.display === '') {
+                document.querySelector('.emojy-panel').style.display = 'none';
+            }
+        }
+    };
+
     var socket = io('', {
         transports: ['websocket'],
         upgrade: false,
@@ -184,7 +199,6 @@ const init = () => {
     });
 
     socket.on('connect', () => {
-
         socket.on('notification', (message) => {
             if (message.to === User._id) {
                 const parent = document.querySelector('[data-id="' + message.from + '"]').parentNode.parentNode;
@@ -192,7 +206,6 @@ const init = () => {
                 parent.querySelector('.last-message-date').innerText = dateTime(message.created);
             }
         });
-
 
         socket.emit('online', User._id);
 
@@ -218,21 +231,4 @@ const init = () => {
             });
         });
     });
-};
-
-init();
-
-setTimeout(() => {
-    chat_container.scrollTop = chat_container.scrollHeight;
-
-    /**
-     * Close Emojy picker
-     */
-    document.onclick = (e) => {
-        if (!e.target.classList.contains('emojy-icon')) {
-            if (document.querySelector('.emojy-panel').style.display === '') {
-                document.querySelector('.emojy-panel').style.display = 'none';
-            }
-        }
-    };
 }, 50);
