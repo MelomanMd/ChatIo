@@ -109,18 +109,18 @@
                             <!--Message-->
                             <% if (chatData.messages.length) { %>
                                 <%  chatData.messages.forEach((message) => { %>
-                                    <div class="d-flex message-item" data-message-id="<%= message.id %>">
+                                    <div class="d-flex message-item <%= message.me ? 'my-message' : '' %>" data-message-id="<%= message.id %>">
                                         <% if (message.me) { %>
                                             <div style="flex: 1 1 0%;"></div>
                                         <% } %>
 
                                         <div class="text-<%= message.me ? 'right' : 'left' %> mb-4" style="width: 100%;">
                                             <!--Selected icon-->
-                                            <div class="im-mess--check fl_l">
+                                            <!-- <div class="im-mess--check fl_l">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                                                     <path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 118 1a7 7 0 010 14zM6 7.94a.75.75 0 10-1 1.12l1.46 1.3c.44.38 1.1.33 1.49-.1l.04-.05 2.9-3.75a.75.75 0 10-1.19-.92L7.1 8.91 6 7.94z"></path>
                                                 </svg>
-                                            </div>
+                                            </div> -->
                                             <!--Selected icon-->
                                             <div class="conversation-list d-inline-block px-3 py-2" style="border-radius: 12px; background-color: rgba(85, 110, 230, 0.1);">
                                                 <div class="ctext-wrap">
@@ -131,6 +131,13 @@
                                                     <p class="text-left"><%= message.message %></p>
                                                     <% if (message.image) { %>
                                                         <p class="text-left"><img src="<%= message.image %>" width="200px" title="Click to open image" /></p>
+                                                    <% } %>
+                                                    <% if (message.me) { %>
+                                                        <p role="link" class="im-mess--edit">
+                                                            <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M9.6 3.64l2.76 2.76L5.75 13a5.2 5.2 0 01-2.16 1.3l-2.25.69a.26.26 0 01-.33-.33l.7-2.25A5.2 5.2 0 013 10.25zm3.95-2.3l1.1 1.1c.44.43.46 1.1.09 1.57l-1.26 1.26-2.75-2.75 1.17-1.18c.46-.45 1.2-.45 1.65 0z" fill="currentColor"></path>
+                                                            </svg>
+                                                        </p>
                                                     <% } %>
                                                     <p class="chat-time mb-0">
                                                         <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">

@@ -94,6 +94,38 @@ const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
     scrollEvents();
 };
 
+
+const editMessage = (message) => {
+    const message_template = `
+    ${message.from === User._id ? '<div style="flex: 1 1 0%;"></div>' : ''}
+
+    <div class="text-${message.from === User._id ? 'right' : 'left'} mb-4" style="width: 100%;">
+        <div class="conversation-list d-inline-block px-3 py-2" style="border-radius: 12px; background-color: rgba(85, 110, 230, 0.1);">
+            <div class="ctext-wrap">
+                <div class="conversation-name text-primary d-flex align-items-center mb-1">
+                    <div class="mr-2" style="font-weight: 600; cursor: pointer;">${ message.username }</div>
+                    <div class="rounded-circle bg-success" style="width: 7px; height: 7px; opacity: 1;"></div>
+                </div>
+                <p class="text-left">${message.message}</p>
+
+                ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
+
+                <p class="chat-time mb-0">
+                    <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path>
+                    </svg>
+                    ${ dateTime(message.date) }
+                </p>
+            </div>
+        </div>
+    </div>
+
+    ${message.from === User._id ? '<div style="flex: 1 1 0%;"></div>' : ''}`;
+
+    document.querySelector('[data-message-id="' + message.editId + '"]').innerHTML = message_template;
+};
+
 const typeInTextarea = (text, el) => {
     el.setRangeText(
         text,
@@ -110,8 +142,9 @@ const uuid = () => {
     });
 };
 
+const selectedMessages = document.querySelector('.count');
+
 const showSelectedMessages = (type = 'add') => {
-    const selectedMessages = document.querySelector('.count');
     if (type === 'add') {
         selectedMessagesContainer.classList.remove('d-none');
         selectedMessagesContainer.classList.add('d-flex');
@@ -132,3 +165,19 @@ const showSelectedMessages = (type = 'add') => {
         selectedMessages.innerText = parseInt(selectedMessages.innerText) - 1;
     }
 };
+
+
+const unselectAllBtn = document.querySelector('.clear-selected')
+unselectAllBtn.addEventListener('click', () => {
+    selectedMessages.innerText = 0;
+
+    selectedMessagesContainer.classList.remove('d-flex');
+    selectedMessagesContainer.classList.add('d-none');
+
+    userStatusContainer.classList.remove('d-none');
+    userStatusContainer.classList.add('d-flex');
+
+    document.querySelectorAll('.selected').forEach(item => {
+        item.classList.remove('selected');
+    })
+});

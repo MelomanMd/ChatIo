@@ -20,7 +20,17 @@ var findChatMessages = (room, id) => {
 		.populate('to', '_id username online');
 };
 
+const removeMessages = (messages, user, callback) => {
+	return chatModel.deleteMany({_id: {$in: messages}, from: user}, callback);
+};
+
+const edit = (data, callback) => {
+	return chatModel.update({_id: data._id}, {message: data.message}, callback);
+};
+
 module.exports = { 
 	findChatMessages,
-	create
+	create,
+	removeMessages,
+	edit
 };

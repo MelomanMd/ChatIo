@@ -82,6 +82,7 @@ var connectRoom = (room) => {
                     to: Companion._id,
                     date: new Date(),
                     username: User.username,
+                    edit: false
                 };
 
                 const file_input = document.getElementById('attachment');
@@ -93,27 +94,42 @@ var connectRoom = (room) => {
                     clearFileInput();
                 }
 
+                const editMessageInput = document.querySelector('.edit-message');
+                if (editMessageInput) {
+                    data.edit = true;
+                    data.editId = editMessageInput.value;
+                }
+
                 socket.emit('newMessage', data);
 
                 message.value = '';
                 message.style.height = '37px';
 
                 setTimeout(() => {
-                    renderMessage(data, true);
+                    if (!editMessageInput) {
+                        renderMessage(data, true);
+                    } else {
+                        editMessage(data);
+                    }
+
+                    unselectAllBtn.click();
 
                     chat_container.scrollTop = chat_container.scrollHeight;
                 }, 150);
             }
         });
 
+        socket.on('editMessage', (message) => {
+            editMessage(message);
+        });
 
-        document.querySelectorAll('.message-item').forEach(item => {
-            item.addEventListener('click', () => {
+        document.querySelectorAll('.my-message').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'path') {
+                    showSelectedMessages(item.querySelector('.mb-4').classList.contains('selected') ? 'remove' : 'add');
 
-                showSelectedMessages(item.querySelector('.mb-4').classList.contains('selected') ? 'remove' : 'add');
-
-                item.querySelector('.mb-4').classList.toggle('selected');
-
+                    item.querySelector('.mb-4').classList.toggle('selected');
+                }
             }, false);
         });
 
@@ -177,6 +193,49 @@ var connectRoom = (room) => {
                 }
             }, { passive: true });
         }
+
+        const removeSelectedBtn = document.querySelector('.selected-buttons > button');
+        removeSelectedBtn.addEventListener('click', () => {
+            const selectedItems = document.querySelectorAll('.selected');
+            const selectedMessages = [];
+            if (selectedItems) {
+                selectedItems.forEach(item => {
+                    const messageId = item.parentElement.dataset.messageId;
+                    if (messageId) {
+                        selectedMessages.push(messageId);
+                    }
+                });
+
+                socket.emit('removeMessages', selectedMessages);
+
+                unselectAllBtn.click();
+            }
+        });
+
+        const editMessageButton = document.querySelectorAll('.im-mess--edit');
+        editMessageButton.forEach(el => {
+            el.addEventListener('click', (e) => {
+                const messageId = e.target.closest('.my-message').dataset.messageId;
+                if (messageId) {
+                    const parentEl = document.querySelector('[data-message-id="' + messageId + '"]');
+                    const messageData = parentEl.querySelector('.text-left');
+                    message.value = messageData.innerText;
+
+                    const editMessageInput = document.querySelector('.edit-message');
+                    if (!editMessageInput) {
+                        const editMessageInput = document.createElement('input');
+                        editMessageInput.name = 'edit-message';
+                        editMessageInput.value = messageId;
+                        editMessageInput.type = 'hidden';
+                        editMessageInput.classList.add('edit-message');
+
+                        document.querySelector('.chat-input-section').appendChild(editMessageInput);
+                    } else {
+                        editMessageInput.value = messageId;
+                    }
+                }
+            })
+        })
     });
 }
 
@@ -228,6 +287,12 @@ setTimeout(() => {
                 if (element.nextElementSibling) {
                     element.nextElementSibling.innerText = 'Not active';
                 }
+            });
+        });
+
+        socket.on('removeMessages', (messages) => {
+            messages.forEach(message => {
+                document.querySelector('[data-message-id="' + message + '"]').remove();
             });
         });
     });

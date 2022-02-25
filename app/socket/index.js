@@ -6,6 +6,7 @@ const dateUtils = require('../helpers/date_helper');
 const {
 	ObjectId
   } = require('mongodb');
+const res = require('express/lib/response');
 
 
 const ioEvents = (io) => {
@@ -16,27 +17,49 @@ const ioEvents = (io) => {
 		});
 
 		socket.on('newMessage', (data) => {
-			Chat.create({room: data.room, from: data.from, to: data.to, message: data.message}, (error, message) => {
+			if (!data.edit) {
+				Chat.create({room: data.room, from: data.from, to: data.to, message: data.message}, (error, message) => {
 
-				if (error) {
-					console.log(error);
-				}
+					if (error) {
+						console.log(error);
+					}
+	
+					if (data.file && data.filename) {
+	
+						fileUtils.saveFile(data);
+	
+						Attachment.create({message: message._id, name:  data.filename});
+	
+						data.image = '/uploads/' +  data.filename;
+					}
+	
+					socket.broadcast.to(data.room).emit('receiveMessage', data);
+	
+					const notification = {to: data.to, from: data.from, message: data.message, created: message.created};
+	
+					socket.broadcast.emit('notification', notification);
+				});
+			} else {
+				Chat.edit({_id: data.editId, message: data.message}, (error, message) => {
 
-				if (data.file && data.filename) {
+					if (error) {
+						console.log(error);
+					}
+	
+					if (data.file && data.filename) {
+	
+						fileUtils.saveFile(data);
+	
+						Attachment.create({message: message._id, name:  data.filename});
+	
+						data.image = '/uploads/' +  data.filename;
+					}
 
-					fileUtils.saveFile(data);
-
-					Attachment.create({message: message._id, name:  data.filename});
-
-					data.image = '/uploads/' +  data.filename;
-				}
-
-				socket.broadcast.to(data.room).emit('receiveMessage', data);
-
-				const notification = {to: data.to, from: data.from, message: data.message, created: message.created};
-
-				socket.broadcast.emit('notification', notification);
-			});
+					console.log(data);
+	
+					socket.broadcast.to(data.room).emit('editMessage', data);
+				});
+			}
 		});
 
 		socket.on('loadMessages', async (room, id) => {
@@ -62,7 +85,6 @@ const ioEvents = (io) => {
 		socket.on('typing', (status, room) => {
 			socket.broadcast.to(room).emit('typing', status);
 		});
-
 	});
 }
 
@@ -93,6 +115,16 @@ const init = (app) => {
 				});
 			}
 			socket.disconnect();
+		});
+
+		socket.on('removeMessages', (messages) => {
+			Chat.removeMessages(messages, socket.request.session.passport?.user, (err) => {
+				if (err) {
+					console.log(err);
+				}
+
+				socket.broadcast.emit('removeMessages', messages);
+			});
 		});
 
 	});

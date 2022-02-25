@@ -430,3 +430,17 @@ span.pseudo-link:hover {
     font-size: 16px;
     vertical-align: middle;
 }
+
+.im-mess--edit {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    display: none;
+    width: 24px;
+    height: 24px;
+    color: #99a2ad;
+}
+
+.my-message:hover .im-mess--edit {
+    display: block;
+}
