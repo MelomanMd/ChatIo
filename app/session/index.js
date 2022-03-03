@@ -1,5 +1,5 @@
-var session 	= require('express-session');
-var config 		= require('../config');
+var session = require('express-session');
+var config  = require('../config');
 
 var init = () => {
     return session({

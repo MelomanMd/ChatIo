@@ -1,15 +1,15 @@
-const express	 	= require('express');
-const router 		= express.Router();
+const express	= require('express');
+const router 	= express.Router();
 const passport 	= require('passport');
 
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Room = require('../models/room');
+const Utils = require('../helpers/date_helper');
 const Attachment = require('../models/attachtment');
 
-var Utils = require('../helpers/date_helper');
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
 	if (req.isAuthenticated()) {
 		res.redirect('/chat');
 	} else {

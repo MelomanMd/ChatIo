@@ -61,7 +61,7 @@ const dayName = (day) => {
 
 
 const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
-    const message_template = `<div class="d-flex message-item" data-message-id="${message.id}">
+    const message_template = `<div class="d-flex message-item ${me ? `my-message` : '' }" data-message-id="${message.id}">
         ${me ? '<div style="flex: 1 1 0%;"></div>' : ''}
 
         <div class="text-${me ? 'right' : 'left'} mb-4" style="width: 100%;">
@@ -75,6 +75,11 @@ const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
 
                     ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
 
+                    ${me ? `<p role="link" class="im-mess--edit">
+                        <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.6 3.64l2.76 2.76L5.75 13a5.2 5.2 0 01-2.16 1.3l-2.25.69a.26.26 0 01-.33-.33l.7-2.25A5.2 5.2 0 013 10.25zm3.95-2.3l1.1 1.1c.44.43.46 1.1.09 1.57l-1.26 1.26-2.75-2.75 1.17-1.18c.46-.45 1.2-.45 1.65 0z" fill="currentColor"></path>
+                        </svg>
+                    </p>` : ''}
                     <p class="chat-time mb-0">
                         <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
@@ -110,6 +115,11 @@ const editMessage = (message) => {
 
                 ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
 
+                ${message.from === User._id ? `<p role="link" class="im-mess--edit">
+                    <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.6 3.64l2.76 2.76L5.75 13a5.2 5.2 0 01-2.16 1.3l-2.25.69a.26.26 0 01-.33-.33l.7-2.25A5.2 5.2 0 013 10.25zm3.95-2.3l1.1 1.1c.44.43.46 1.1.09 1.57l-1.26 1.26-2.75-2.75 1.17-1.18c.46-.45 1.2-.45 1.65 0z" fill="currentColor"></path>
+                    </svg>
+                </p>` : ''}
                 <p class="chat-time mb-0">
                     <svg width="12" height="12" class="prefix__MuiSvgIcon-root prefix__jss80 prefix__MuiSvgIcon-fontSizeLarge" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
@@ -167,8 +177,7 @@ const showSelectedMessages = (type = 'add') => {
 };
 
 
-const unselectAllBtn = document.querySelector('.clear-selected')
-unselectAllBtn.addEventListener('click', () => {
+addDynamicEventListener(document.body, 'click', '.clear-selected', () => {
     selectedMessages.innerText = 0;
 
     selectedMessagesContainer.classList.remove('d-flex');
@@ -179,5 +188,74 @@ unselectAllBtn.addEventListener('click', () => {
 
     document.querySelectorAll('.selected').forEach(item => {
         item.classList.remove('selected');
-    })
+    });
 });
+
+addDynamicEventListener(document.body, 'click', '.im-mess--edit', (el) => {
+    const messageId = el.target.closest('.my-message').dataset.messageId;
+    if (messageId) {
+        const parentEl = document.querySelector('[data-message-id="' + messageId + '"]');
+        const messageData = parentEl.querySelector('.text-left');
+
+        message.value = messageData.innerText;
+
+        const editMessageInput = document.querySelector('.edit-message');
+        if (!editMessageInput) {
+            const editMessageInput = document.createElement('input');
+                editMessageInput.name = 'edit-message';
+                editMessageInput.value = messageId;
+                editMessageInput.type = 'hidden';
+                editMessageInput.classList.add('edit-message');
+
+            document.querySelector('.chat-input-section').appendChild(editMessageInput);
+        } else {
+            editMessageInput.value = messageId;
+        }
+    }
+});
+
+
+addDynamicEventListener(document.body, 'click', '.my-message', (el) => {
+    if (el.target.tagName !== 'path') {
+        showSelectedMessages(el.target.classList.contains('selected') ? 'remove' : 'add');
+
+        el.target.classList.toggle('selected');
+    }
+});
+
+const scrollEvents = () => {
+    const scrolled = Math.abs((chat_container.scrollTop + chat_container.clientHeight) - chat_container.scrollHeight);
+    if (scrolled < 350) {
+        chat_container.scrollTop = chat_container.scrollHeight;
+    }
+};
+
+const emojyButton = document.querySelector('.emojy-icon');
+if (emojyButton) {
+    emojyButton.addEventListener('click', () => {
+        const emojyElement = document.querySelector('.emojy-panel');
+        emojyElement.style.display = emojyElement.style.display === 'none' ? '' : 'none';
+    });
+};
+
+const fileButton = document.querySelector('.file-icon');
+if (fileButton) {
+    fileButton.addEventListener('click', () => {
+        document.querySelector('[type="file"]').click();
+    });
+};
+
+
+const emojyPicker = document.querySelector('emoji-picker');
+if (emojyPicker) {
+    emojyPicker.addEventListener('emoji-click', (e) => {
+        typeInTextarea(e.detail.unicode, message);
+    });
+}
+
+const logoutButton = document.querySelector('.logout');
+if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+        location.href = '/logout';
+    });
+}

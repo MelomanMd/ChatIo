@@ -196,6 +196,7 @@
            </div>
         </div>
      </div>
+    <script src="/js/dynamicListener.js"></script>
     <script src="/js/chat.js"></script>
     <script src="/js/utils.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
@@ -203,7 +204,8 @@
     <% if (chatData.room && chatData.room._id) { %>
         <script src="/js/attachtments.js"></script>
         <script>const Companion = <%- JSON.stringify(chatData.he) %>; </script>
-        <script>connectRoom('<%= chatData.room.id %>');</script>
+        <!-- <script>connectRoom('<%= chatData.room.id %>');</script> -->
+        <script>initChatRoom('<%= chatData.room.id %>');</script>
     <% } %>
 </body>
 </html>
