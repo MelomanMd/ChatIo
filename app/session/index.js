@@ -1,13 +1,10 @@
-var session = require('express-session');
-var config  = require('../config');
+const session = require('express-session');
+const config  = require('../config');
 
-var init = () => {
-    return session({
-        secret: config.sessionSecret,
-        resave: true,
-        unset: 'destroy',
-        saveUninitialized: true
-    });
-}
-
-module.exports = init();
+module.exports = session({
+    key: 'express.sid',
+    secret: config.sessionSecret,
+    resave: true,
+    unset: 'destroy',
+    saveUninitialized: true
+});

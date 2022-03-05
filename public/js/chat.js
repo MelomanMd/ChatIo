@@ -18,7 +18,7 @@ const chat_container = document.querySelector('.chat-box-wrapper');
 const preloader = document.querySelector('.preloader');
 const selectedMessagesContainer = document.querySelector('.selected-messages');
 const userStatusContainer = document.querySelector('.user-status-conversation');
-
+const emojiPanel = document.querySelector('.emojy-panel');
 
 const initChatRoom = (roomId) => {
     var chatSocket = io('/chat', {
@@ -193,13 +193,24 @@ setTimeout(() => {
 
     document.onclick = (e) => {
         if (!e.target.classList.contains('emojy-icon')) {
-            if (document.querySelector('.emojy-panel').style.display === '') {
-                document.querySelector('.emojy-panel').style.display = 'none';
+            if (emojiPanel) {
+                if (emojiPanel.style.display === '') {
+                    emojiPanel.style.display = 'none';
+                }
             }
         }
     };
 
-    // socket.on('connect', () => {
+    var notificationsSocket = io('/notifications', {
+        transports: ['websocket'],
+        upgrade: true,
+        reconnection: true,
+        rejectUnauthorized: false
+    });
+
+    notificationsSocket.on('connect', () => {
+
+        notificationsSocket.emit('online', User._id);
 
     //     socket.on('notification', (message) => {
     //         if (message.to === User._id) {
@@ -208,8 +219,6 @@ setTimeout(() => {
     //             parent.querySelector('.last-message-date').innerText = dateTime(message.created);
     //         }
     //     });
-
-    //     socket.emit('online', User._id);
 
     //     socket.on('userOnline', (user) => {
     //         document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
@@ -238,5 +247,5 @@ setTimeout(() => {
     //             document.querySelector('[data-message-id="' + message + '"]').remove();
     //         });
     //     });
-    // });
+    });
 }, 50);
