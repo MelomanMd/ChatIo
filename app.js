@@ -12,6 +12,7 @@ const MongoStore   = require('connect-mongo');
 const config       = require('./app/config');
 const sessionStore = MongoStore.create({ mongoUrl: 'mongodb+srv://main:main@cluster0.q6tys.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', ttl: 60 * 60 * 1000 });
 
+
 /**
  * Views config
  */
@@ -33,7 +34,8 @@ app.use('/uploads', express.static(__dirname + '/public/uploads'));
 /**
  * Session
  */
-app.use(session({
+
+let userSession = session({
   resave: true,
   key: 'express.sid',
   store: sessionStore,
@@ -42,7 +44,9 @@ app.use(session({
   cookie: {
     maxAge: 60 * 60 * 1000
   }
-}));
+});
+
+app.use(userSession);
 
 app.use(passport.initialize());
 app.use(passport.session());

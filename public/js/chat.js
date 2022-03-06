@@ -1,3 +1,10 @@
+var chatSocket = io('', {
+    transports: ['websocket'],
+    upgrade: true,
+    reconnection: true,
+    rejectUnauthorized: false
+});
+
 const submit = document.querySelector('.chat-send');
 const message = document.querySelector('.chat-input');
 if (message) {
@@ -21,13 +28,6 @@ const userStatusContainer = document.querySelector('.user-status-conversation');
 const emojiPanel = document.querySelector('.emojy-panel');
 
 const initChatRoom = (roomId) => {
-    var chatSocket = io('/chat', {
-        transports: ['websocket'],
-        upgrade: true,
-        reconnection: true,
-        rejectUnauthorized: false
-    });
-
     let loading = false;
     let countMessages = 10;
 
@@ -54,7 +54,7 @@ const initChatRoom = (roomId) => {
         /**
          * Typing status 
          */
-        chatSocket.on('typing', (is_typing) => {
+        chatSocket.on('typing', is_typing => {
             document.querySelector('.typing').style.display = is_typing ? '' : 'none';
         });
 
@@ -81,14 +81,20 @@ const initChatRoom = (roomId) => {
         /**
          * Recive new message event
          */
-        chatSocket.on('receiveMessage', (message) => {
-            renderMessage(message, false);
+        chatSocket.on('receiveMessage', message => {
+            var me = false;
+            if (message) {
+                if (message.from && message.from === User._id) {
+                    me = true;
+                }
+            }
+            renderMessage(message, me);
         });
 
         /**
          * Edit message event
          */
-        chatSocket.on('editMessage', (message) => {
+        chatSocket.on('editMessage', message => {
             editMessage(message);
         });
 
@@ -130,10 +136,10 @@ const initChatRoom = (roomId) => {
                 message.style.height = '37px';
 
                 setTimeout(() => {
-                    if (!editMessageInput) {
-                        renderMessage(data, true);
-                    } else {
+                    if (editMessageInput) {
                         editMessage(data);
+
+                        editMessageInput.remove();
                     }
 
                     document.querySelector('.clear-selected').click();
@@ -146,7 +152,7 @@ const initChatRoom = (roomId) => {
         /**
          * Infnite preload messsages
          */
-        chatSocket.on('preloadMessages', (msg_list) => {
+        chatSocket.on('preloadMessages', msg_list => {
             loading = false;
 
             preloader.style.display = 'none';
@@ -201,51 +207,64 @@ setTimeout(() => {
         }
     };
 
-    var notificationsSocket = io('/notifications', {
-        transports: ['websocket'],
-        upgrade: true,
-        reconnection: true,
-        rejectUnauthorized: false
-    });
+    chatSocket.on('connect', () => {
 
-    notificationsSocket.on('connect', () => {
+        /**
+         * Emit join room
+         */
+         chatSocket.emit('joinRoom', 'notifications-room');
+        
+        /**
+         * Emit online status
+         */
+         chatSocket.emit('online', User._id);
 
-        notificationsSocket.emit('online', User._id);
+        /**
+         * Notification
+         */
+         chatSocket.on('notification', message => {
+            if (message.to === User._id) {
+                const parent = document.querySelector('[data-id="' + message.from + '"]').parentNode.parentNode;
+                parent.querySelector('.last-message-text').innerText = message.message;
+                parent.querySelector('.last-message-date').innerText = dateTime(message.created);
+            }
+        });
 
-    //     socket.on('notification', (message) => {
-    //         if (message.to === User._id) {
-    //             const parent = document.querySelector('[data-id="' + message.from + '"]').parentNode.parentNode;
-    //             parent.querySelector('.last-message-text').innerText = message.message;
-    //             parent.querySelector('.last-message-date').innerText = dateTime(message.created);
-    //         }
-    //     });
+        /**
+         * Change online status
+         */
+         chatSocket.on('userOnline', user => {
+            document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
+                element.classList.remove('bg-gray');
+                element.classList.add('bg-success');
 
-    //     socket.on('userOnline', (user) => {
-    //         document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
-    //             element.classList.remove('bg-gray');
-    //             element.classList.add('bg-success');
+                if (element.nextElementSibling) {
+                    element.nextElementSibling.innerText = 'Active';
+                }
+            });
+        });
 
-    //             if (element.nextElementSibling) {
-    //                 element.nextElementSibling.innerText = 'Active';
-    //             }
-    //         });
-    //     });
+        /**
+         * Change offline status
+         */
+         chatSocket.on('userOffline', user => {
+            document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
+                element.classList.remove('bg-success');
+                element.classList.add('bg-gray');
 
-    //     socket.on('userOffline', (user) => {
-    //         document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
-    //             element.classList.remove('bg-success');
-    //             element.classList.add('bg-gray');
+                if (element.nextElementSibling) {
+                    element.nextElementSibling.innerText = 'Not active';
+                }
+            });
+        });
 
-    //             if (element.nextElementSibling) {
-    //                 element.nextElementSibling.innerText = 'Not active';
-    //             }
-    //         });
-    //     });
-
-    //     socket.on('removeMessages', (messages) => {
-    //         messages.forEach(message => {
-    //             document.querySelector('[data-message-id="' + message + '"]').remove();
-    //         });
-    //     });
+        /**
+         * Remove message
+         */
+         chatSocket.on('removeMessages', messages => {
+            messages.forEach(message => {
+                document.querySelector('[data-message-id="' + message + '"]').remove();
+            });
+        });
     });
 }, 50);

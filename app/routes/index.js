@@ -106,17 +106,18 @@ router.get('/chats', [User.isAuthenticated, async (req, res) => {
 	});
 }]);
 
-router.get('/logout', (req, res, next) => {
-	req.logout();
-	req.session = null;
-	res.redirect('/');
-});
-
-router.post('/login', passport.authenticate('local', { 
+router.post('/login', passport.authenticate('local', {
 	successRedirect: '/chat', 
 	failureRedirect: '/',
 	failureFlash: true
 }));
+
+router.get('/logout', (req, res, next) => {
+	req.logout();
+	req.session.destroy(() => {
+		res.redirect('/');
+	});
+});
 
 router.post('/register', (req, res, next) => {
 
