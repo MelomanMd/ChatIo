@@ -1,13 +1,11 @@
 const express	= require('express');
 const router 	= express.Router();
 const passport 	= require('passport');
-
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Room = require('../models/room');
 const Utils = require('../helpers/date_helper');
 const Attachment = require('../models/attachtment');
-
 
 router.get('/', (req, res) => {
 	if (req.isAuthenticated()) {
@@ -21,6 +19,75 @@ router.get('/', (req, res) => {
 	}
 });
 
+router.post('/login', passport.authenticate('local', {
+	successRedirect: '/chat', 
+	failureRedirect: '/',
+	failureFlash: true
+}));
+
+router.get('/logout', (req, res) => {
+	req.logout();
+	req.session.destroy(() => {
+		res.redirect('/');
+	});
+});
+
+router.post('/register', (req, res) => {
+
+	var credentials = {
+        'username': req.body.username,
+        'password': req.body.password
+    };
+
+	if (credentials.username === '' || credentials.password === '') {
+		req.flash('error', 'Missing credentials');
+		req.flash('showRegisterForm', true);
+		res.redirect('/');
+	} else {
+		User.findOne({'username': new RegExp('^' + req.body.username + '$', 'i')}, (err, user) => {
+			if (err) {
+                throw err;
+            }
+
+            if (user) {
+				req.flash('error', 'Username already exists.');
+				req.flash('showRegisterForm', true);
+				res.redirect('/');
+			} else {
+				User.create(credentials, (err) => {
+					if (err) {
+                        throw err;
+                    }
+
+                    req.flash('success', 'Your account has been created. Please log in.');
+					res.redirect('/');
+				});
+			}
+		});
+	}
+});
+
+router.get('/chat', [User.isAuthenticated, async (req, res) => {
+	if (req.isAuthenticated()) {
+		var userId = req.user.id;
+
+		let chatData = {
+			me: await User.findById(userId),
+			he: {},
+			usersList: await User.usersList(req.user._id),
+			messages: [],
+			room: {}
+		};
+
+		res.render('chats', {
+			chatData
+		});
+
+	} else {
+		res.redirect('/');
+	}
+}]);
+
 router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 	if (req.isAuthenticated()) {
 		var chatId = req.params.id;
@@ -33,7 +100,6 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 		const room = await Room.findOrCreate([chatId, userId]).then(room => room);
 		if (!room) {
 			res.redirect('/');
-			return;
 		}
 
 		const msg_list = await Chat.findChatMessages(room._id, 0);
@@ -67,92 +133,5 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 		res.redirect('/');
 	}
 }]);
-
-router.get('/chat', [User.isAuthenticated, async (req, res) => {
-	if (req.isAuthenticated()) {
-		var userId = req.user.id;
-
-		let chatData = {
-			me: await User.findById(userId),
-			he: {},
-			usersList: await User.usersList(req.user._id),
-			messages: [],
-			room: {}
-		};
-
-		res.render('chats', {
-			chatData
-		});
-
-	} else {
-		res.redirect('/');
-	}
-}]);
-
-
-router.get('/chats', [User.isAuthenticated, async (req, res) => {
-	var userId = req.user.id;
-
-	let chatData = {
-		me: await User.findById(userId),
-		he: {},
-		usersList: await User.usersList(req.user._id),
-		messages: [],
-		room: {}
-	};
-
-	res.render('chats', {
-		chatData
-	});
-}]);
-
-router.post('/login', passport.authenticate('local', {
-	successRedirect: '/chat', 
-	failureRedirect: '/',
-	failureFlash: true
-}));
-
-router.get('/logout', (req, res, next) => {
-	req.logout();
-	req.session.destroy(() => {
-		res.redirect('/');
-	});
-});
-
-router.post('/register', (req, res, next) => {
-
-	var credentials = {
-        'username': req.body.username,
-        'password': req.body.password
-    };
-
-	if (credentials.username === '' || credentials.password === '') {
-		req.flash('error', 'Missing credentials');
-		req.flash('showRegisterForm', true);
-		res.redirect('/');
-	} else {
-
-		User.findOne({'username': new RegExp('^' + req.body.username + '$', 'i')}, (err, user) => {
-			if (err) {
-                throw err;
-            }
-
-            if (user) {
-				req.flash('error', 'Username already exists.');
-				req.flash('showRegisterForm', true);
-				res.redirect('/');
-			} else {
-				User.create(credentials, (err, newUser) => {
-					if (err) {
-                        throw err;
-                    }
-
-                    req.flash('success', 'Your account has been created. Please log in.');
-					res.redirect('/');
-				});
-			}
-		});
-	}
-});
 
 module.exports = router;

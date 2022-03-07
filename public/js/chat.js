@@ -70,6 +70,8 @@ const initChatRoom = (roomId) => {
                     if (messageId) {
                         selectedMessages.push(messageId);
                     }
+
+                    document.querySelector('[data-message-id="' + messageId + '"]').remove();
                 });
 
                 chatSocket.emit('removeMessages', selectedMessages);
@@ -211,18 +213,18 @@ setTimeout(() => {
 
         /**
          * Emit join room
-         */
-         chatSocket.emit('joinRoom', 'notifications-room');
+        */
+        chatSocket.emit('joinRoom', 'notifications-room');
         
         /**
          * Emit online status
-         */
-         chatSocket.emit('online', User._id);
+        */
+        chatSocket.emit('online', User);
 
         /**
          * Notification
-         */
-         chatSocket.on('notification', message => {
+        */
+        chatSocket.on('notification', message => {
             if (message.to === User._id) {
                 const parent = document.querySelector('[data-id="' + message.from + '"]').parentNode.parentNode;
                 parent.querySelector('.last-message-text').innerText = message.message;
@@ -232,8 +234,27 @@ setTimeout(() => {
 
         /**
          * Change online status
-         */
-         chatSocket.on('userOnline', user => {
+        */
+        chatSocket.on('userOnline', user => {
+
+            if (!document.querySelectorAll('[data-id="' + user._id + '"]').length) {
+                const users_list_item = `<div class="chat-list-item d-flex align-items-start rounded" onclick="location.href='/chat/${user._id}';">
+                    <div class="align-self-center mr-3">
+                        <div class="rounded-circle bg-success" data-id="${user._id}" style="width: 8px; height: 8px; opacity: 1;"></div>
+                    </div>
+                    <div class="align-self-center mr-3">
+                        <img src="https://eu.ui-avatars.com/api/?name=${user.username}&background=random" class="rounded-circle avatar-xs" style="width: 48px; height: 48px; object-fit: cover;">
+                    </div>
+                    <div class="media-body overflow-hidden">
+                        <h5 class="text-truncate font-size-14 mb-1">${user.username}</h5>
+                        <p class="text-truncate mb-0 last-message-text"></p>
+                    </div>
+                    <div class="font-size-11 last-message-date"></div>
+                </div>`;
+
+                document.querySelector('.list-group').insertAdjacentHTML('beforeend', users_list_item);
+            }
+
             document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
                 element.classList.remove('bg-gray');
                 element.classList.add('bg-success');
@@ -246,8 +267,8 @@ setTimeout(() => {
 
         /**
          * Change offline status
-         */
-         chatSocket.on('userOffline', user => {
+        */
+        chatSocket.on('userOffline', user => {
             document.querySelectorAll('[data-id="' + user + '"]').forEach(element => {
                 element.classList.remove('bg-success');
                 element.classList.add('bg-gray');
@@ -260,8 +281,8 @@ setTimeout(() => {
 
         /**
          * Remove message
-         */
-         chatSocket.on('removeMessages', messages => {
+        */
+        chatSocket.on('removeMessages', messages => {
             messages.forEach(message => {
                 document.querySelector('[data-message-id="' + message + '"]').remove();
             });

@@ -35,7 +35,7 @@ module.exports = (server, sessionStore) => {
 		 * Online user status
 		 */
 		socket.on('online', (user) => {
-			User.updateUser(user, {online: 'online'}, () => {
+			User.updateUser(user._id, {online: 'online'}, () => {
 				socket.broadcast.emit('userOnline', user);
 			});
 		});
@@ -47,9 +47,9 @@ module.exports = (server, sessionStore) => {
 			if (userId) {
 				User.updateUser(userId, {online: 'offline'}, () => {
 					socket.broadcast.emit('userOffline', userId);
-			});
+				});
 
-			socket.leave(userId);
+				socket.leave(userId);
 			}
 			socket.disconnect();
 		});
@@ -133,7 +133,7 @@ module.exports = (server, sessionStore) => {
 			const messages = await Promise.all(msg_list.map(async message => ({
 				id: message._id,
 				message: message.message,
-                me: message.from.id === socket.request.session.user._id,
+                me: message.from.id === socket.request.user._id,
 				user: message.from,
 				created: dateUtils.dateTime(message.created),
 				image: await Attachment.findOne({message: message._id}).then(image => {
@@ -144,6 +144,16 @@ module.exports = (server, sessionStore) => {
 			})));
 
 			socket.emit('preloadMessages', messages);
+		});
+
+		socket.on('removeMessages', messages => {
+			Chat.removeMessages(messages, socket.request.user._id, (err) => {
+				if (err) {
+					console.log(err);
+				}
+
+				socket.broadcast.emit('removeMessages', messages);
+			});
 		});
 	});
 
