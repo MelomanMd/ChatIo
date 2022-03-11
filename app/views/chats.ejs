@@ -121,7 +121,14 @@
                                                         <div class="mr-2" style="font-weight: 600; cursor: pointer;"><%= message.user.username %></div>
                                                         <div class="rounded-circle bg-<%= message.user.online === 'online' ? 'success' : 'gray' %>" style="width: 7px; height: 7px; opacity: 1;"></div>
                                                     </div>
-                                                    <p class="text-left"><%= message.message %></p>
+                                                    
+                                                    <% if (message.reply && message.reply.from) { %>
+                                                        <div class="blockquote">
+                                                            <strong><%- message.reply.from %></strong>
+                                                            <%- message.reply.message.message %>
+                                                        </div>
+                                                    <% } %>
+                                                    <p class="text-left"><%- message.message %></p>
                                                     <% if (message.image) { %>
                                                         <p class="text-left"><img src="<%= message.image %>" width="200px" title="Click to open image" /></p>
                                                     <% } %>
@@ -173,6 +180,7 @@
                                         <div class="user-info">
                                             <%= chatData.he.username %>
                                         </div>
+                                        <span class="_im_remove_replied" title="Remove reply message"></span>
                                         <div class="message"></div>
                                     </div>
                                     <textarea class="form-control chat-input" style="height: 37px;" placeholder="Type your message..."></textarea>

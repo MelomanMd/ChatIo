@@ -132,6 +132,15 @@ const initChatRoom = (roomId) => {
                     data.editId = editMessageInput.value;
                 }
 
+                data.message = data.message.trim();
+                const quote = document.querySelector('.reply-message .message').innerText;
+                if (quote.length > 0) {
+                    data.reply = {
+                        from: User.username,
+                        message: document.querySelector('.quote-message').value
+                    };
+                }
+
                 chatSocket.emit('newMessage', data);
 
                 message.value = '';
@@ -139,7 +148,7 @@ const initChatRoom = (roomId) => {
 
                 setTimeout(() => {
                     if (editMessageInput) {
-                        editMessage(data);
+                        // editMessage(data);
 
                         editMessageInput.remove();
                     }

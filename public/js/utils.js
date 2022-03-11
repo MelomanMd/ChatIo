@@ -69,6 +69,12 @@ const renderMessage = (message, me, position = 'beforeend', loaded = false) => {
                         <div class="mr-2" style="font-weight: 600; cursor: pointer;">${ !loaded ? message.username : message.user.username}</div>
                         <div class="rounded-circle bg-success" style="width: 7px; height: 7px; opacity: 1;"></div>
                     </div>
+
+                    ${message.reply ? `<div class="blockquote">
+                            <strong>${message.reply.from}</strong>
+                            ${message.reply.message}
+                        </div>` : ''}
+
                     <p class="text-left">${message.message}</p>
 
                     ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
@@ -115,6 +121,12 @@ const editMessage = (message) => {
                     <div class="mr-2" style="font-weight: 600; cursor: pointer;">${ message.username }</div>
                     <div class="rounded-circle bg-success" style="width: 7px; height: 7px; opacity: 1;"></div>
                 </div>
+
+                ${message.reply ? `<div class="blockquote">
+                            <strong>${message.reply.from}</strong>
+                            ${message.reply.message}
+                        </div>` : ''}
+
                 <p class="text-left">${message.message}</p>
 
                 ${message.image ? `<p class="text-left"><img src="${message.image}" width="200px" /></p>` : ``}
@@ -230,9 +242,22 @@ addDynamicEventListener(document.body, 'click', '.im-mess--reply', (el) => {
     if (messageId) {
         const parentEl = document.querySelector('[data-message-id="' + messageId + '"]');
         const messageData = parentEl.querySelector('p.text-left');
-        console.log(messageData);
+
         replyMessageData.style.display = '';
         replyMessageData.querySelector('.message').innerText = messageData.innerText;
+
+        const quoteMessageInput = document.querySelector('.edit-message');
+        if (!quoteMessageInput) {
+            const quoteMessageInput = document.createElement('input');
+                quoteMessageInput.name = 'quote-message';
+                quoteMessageInput.value = messageId;
+                quoteMessageInput.type = 'hidden';
+                quoteMessageInput.classList.add('quote-message');
+
+            document.querySelector('.chat-input-section').appendChild(quoteMessageInput);
+        } else {
+            quoteMessageInput.value = messageId;
+        }
 
         // message.value = messageData.innerText;
 

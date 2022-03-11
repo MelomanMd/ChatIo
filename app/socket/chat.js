@@ -73,7 +73,7 @@ module.exports = (server, sessionStore) => {
          */
         socket.on('newMessage', data => {
 			if (!data.edit) {
-				Chat.create({room: data.room, from: data.from, to: data.to, message: data.message}, (error, message) => {
+				Chat.create({room: data.room, from: data.from, to: data.to, message: data.message, reply: data.reply}, async (error, message) => {
 
 					if (error) {
 						console.log(error);
@@ -86,6 +86,15 @@ module.exports = (server, sessionStore) => {
 						Attachment.create({message: message._id, name:  data.filename});
 	
 						data.image = '/uploads/' +  data.filename;
+					}
+
+					if (data.reply) {
+						data.reply.from = data.reply.from;
+						data.reply.message = await Chat.find(data.reply.message).then(message => {
+							if (message.message) {
+								return message.message;
+							}
+						});
 					}
 	
 					data._id = message._id;
@@ -102,7 +111,7 @@ module.exports = (server, sessionStore) => {
 					socket.broadcast.to('notifications-room').emit('notification', notification);
 				});
 			} else {
-				Chat.edit({_id: data.editId, message: data.message}, (error, message) => {
+				Chat.edit({_id: data.editId, message: data.message}, async (error, message) => {
 
 					if (error) {
 						console.log(error);
@@ -117,9 +126,25 @@ module.exports = (server, sessionStore) => {
 						data.image = '/uploads/' +  data.filename;
 					}
 
+					if (message.reply && message.reply.message) {
+						data.reply = {};
+						data.reply.from = message.reply.from;
+						data.reply.message = await Chat.find(message.reply.message).then(message => {
+							if (message.message) {
+								return message.message;
+							}
+						});
+					}
+
 					data._id = data.editId;
+
+					data.image = await Attachment.findOne({message: message.id}).then(image => {
+						if (image && image.name) {
+							return `/uploads/${image.name}`;
+						}
+					});
 	
-					socket.broadcast.to(data.room).emit('editMessage', data);
+					socket.to(data.room).emit('editMessage', data);
 				});
 			}
 		});

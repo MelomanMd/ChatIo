@@ -4,7 +4,7 @@ var bcrypt      = require('bcrypt-nodejs');
 const SALT_WORK_FACTOR = 10;
 
 var UserSchema = new Mongoose.Schema({
-    username: { type: String, index: true, required: true},
+    username: { type: String, index: true, required: true },
     password: { type: String, default: null, required: true },
     online: { type: String, index: true, default: 'offline' }
 });

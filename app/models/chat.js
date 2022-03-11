@@ -3,6 +3,10 @@ const {
 	ObjectId
   } = require('mongodb');
 
+const find = (id) => {
+	return chatModel.findOne({_id: id});
+};
+
 const create = (data, callback) => {
 	new chatModel(data).save(callback);
 };
@@ -17,7 +21,8 @@ var findChatMessages = (room, id) => {
 		.limit(10)
 		.sort({$natural: -1})
 		.populate('from', '_id username online')
-		.populate('to', '_id username online');
+		.populate('to', '_id username online')
+		.populate('reply.message', 'message');
 };
 
 const removeMessages = (messages, user, callback) => {
@@ -25,10 +30,11 @@ const removeMessages = (messages, user, callback) => {
 };
 
 const edit = (data, callback) => {
-	return chatModel.update({_id: data._id}, {message: data.message}, callback);
+	return chatModel.findOneAndUpdate({_id: data._id}, {message: data.message}, {returnOriginal: false}, callback);
 };
 
 module.exports = { 
+	find,
 	findChatMessages,
 	create,
 	removeMessages,

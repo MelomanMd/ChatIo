@@ -110,6 +110,7 @@ router.get('/chat/:id', [User.isAuthenticated, async (req, res) => {
 			me: message.from.id === userId,
 			user: message.from,
 			created: Utils.dateTime(message.created),
+			reply: message.reply,
 			image: await Attachment.findOne({message: message.id}).then(image => {
 				if (image && image.name) {
 					return `/uploads/${image.name}`;
