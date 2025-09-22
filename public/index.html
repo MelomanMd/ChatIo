@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codex — Fast, Minimalist Unit Converter (Web &amp; Mobile)</title>
+  <meta name="description" content="Convert length, cooking, currency, data, energy, and health in seconds. Codex is fast, accurate, and distraction-free—with favorites and dark mode." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="hero" id="top">
+    <div class="hero__content">
+      <span class="hero__badge">Minimal &amp; fast</span>
+      <h1>Codex converts anything—instantly.</h1>
+      <p class="hero__subtitle">From cups to grams, inches to cm, USD to EUR, GB to MB—clean, fast, and accurate.</p>
+      <div class="hero__actions">
+        <a href="#converter" class="btn btn--primary">Start Converting</a>
+        <a href="#categories" class="btn btn--ghost">Browse Categories</a>
+      </div>
+      <p class="hero__meta">Simple. Precise. Universal.</p>
+    </div>
+    <div class="hero__aside">
+      <div class="theme-toggle" role="group" aria-label="Toggle theme">
+        <button id="themeToggle" class="theme-toggle__btn" type="button" aria-live="polite">🌙 Dark</button>
+      </div>
+      <div class="hero__card">
+        <h2>Smart search</h2>
+        <p>Type naturally—“10 cups flour → grams”—and Codex finds the best conversion in milliseconds.</p>
+        <ul class="hero__bullets">
+          <li>Favorites &amp; history</li>
+          <li>Cooking-aware results</li>
+          <li>SEO-ready bookmarks</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="converter" aria-labelledby="converter-heading">
+      <div class="panel__header">
+        <h2 id="converter-heading">Convert anything without the clutter</h2>
+        <p>Lightning-fast results for cooking, currency, length, data, energy, and health.</p>
+      </div>
+      <div class="converter">
+        <label class="sr-only" for="query">Search a conversion</label>
+        <div class="converter__input">
+          <span class="converter__icon" aria-hidden="true">🔍</span>
+          <input id="query" name="query" placeholder="Try: 10 cups flour to grams" autocomplete="off" />
+          <button id="clearQuery" class="converter__clear" type="button" aria-label="Clear input">✕</button>
+        </div>
+        <div class="converter__meta" id="queryHelper">
+          <span>Examples:</span>
+          <div class="chip-list" id="exampleChips" aria-label="Example conversions"></div>
+        </div>
+        <div class="converter__output" id="results" aria-live="polite"></div>
+        <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="panel panel--split" id="favorites" aria-labelledby="favorites-heading">
+      <div>
+        <h2 id="favorites-heading">Pinned conversions</h2>
+        <p>Save the conversions you use the most. Codex keeps them synced across sessions in your browser.</p>
+        <div class="list" id="favoriteList" data-empty="No favorites yet. Tap the star on a result to pin it."></div>
+      </div>
+      <div>
+        <h2 id="history-heading">Recent activity</h2>
+        <p>Your last searches stay handy for quick repeats. Privacy friendly—stored locally only.</p>
+        <div class="list" id="historyList" data-empty="No conversions yet. Start typing above to see results."></div>
+      </div>
+    </section>
+
+    <section class="panel panel--accent" id="categories" aria-labelledby="categories-heading">
+      <div class="panel__header">
+        <h2 id="categories-heading">Browse categories</h2>
+        <p>Mobile-first cards optimized for quick scanning and ad-friendly layouts.</p>
+      </div>
+      <div class="category-grid" id="categoryGrid"></div>
+    </section>
+
+    <section class="panel" id="features" aria-labelledby="features-heading">
+      <div class="panel__header">
+        <h2 id="features-heading">Key features</h2>
+        <p>Built for 2025 workflows—fast, accessible, and distraction-free.</p>
+      </div>
+      <dl class="feature-list">
+        <div>
+          <dt>Quick Search</dt>
+          <dd>Type naturally and get instant results.</dd>
+        </div>
+        <div>
+          <dt>Cooking Mode</dt>
+          <dd>Cups, ml, grams—ingredient aware.</dd>
+        </div>
+        <div>
+          <dt>Currency &amp; Crypto</dt>
+          <dd>Live-like rates for global conversions.</dd>
+        </div>
+        <div>
+          <dt>Tech Tools</dt>
+          <dd>Storage, speed, DPI, energy, power.</dd>
+        </div>
+        <div>
+          <dt>Favorites</dt>
+          <dd>Pin your most-used conversions.</dd>
+        </div>
+        <div>
+          <dt>Dark Mode</dt>
+          <dd>Clean contrast, day or night.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel panel--highlight" id="about" aria-labelledby="about-heading">
+      <div class="panel__header">
+        <h2 id="about-heading">About Codex</h2>
+        <p>The cleanest way to convert anything—without the clutter.</p>
+      </div>
+      <div class="about__content">
+        <p>Codex is a minimalist unit converter designed for 2025 workflows. Type naturally (“10 cups flour → grams”) or browse categories like Length, Weight, Cooking, Currency, Tech, and Health. Get instant, accurate results with thoughtful details—multi-output views, quick favorites, and SEO-friendly pages you can bookmark and share.</p>
+        <p>Codex is lightweight, fast on any device, and built with accessibility and dark mode in mind.</p>
+        <ul class="about__props">
+          <li><strong>Minimal &amp; Fast:</strong> Results as you type.</li>
+          <li><strong>All-in-One:</strong> Cooking, currency, tech, health.</li>
+          <li><strong>Made for 2025:</strong> Mobile-first, SEO-ready, ad-supported.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__content">
+      <p class="footer__tagline">Convert anything. Instantly.</p>
+      <nav class="footer__nav">
+        <a href="#top">Back to top</a>
+        <a href="#converter">Search a Conversion</a>
+        <a href="#categories">Browse Categories</a>
+      </nav>
+      <p class="footer__note">Built with a calm, precise, helpful tone.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

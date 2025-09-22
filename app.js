@@ -1,74 +1,61 @@
-const express 	   = require('express');
-const app  		     = express();
-const path 		     = require('path');
-const bodyParser   = require('body-parser');
-const flash 		   = require('connect-flash');
-const routes       = require('./app/routes');
-const passport     = require('./app/auth');
-const server       = require('http').createServer(app);
-const session      = require('express-session');
-const port         = process.env.PORT || 3010;
-const MongoStore   = require('connect-mongo');
-const config       = require('./app/config');
-const sessionStore = MongoStore.create({ mongoUrl: 'mongodb+srv://main:main@cluster0.q6tys.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', ttl: 60 * 60 * 1000 });
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
+const port = process.env.PORT || 3010;
+const publicDir = path.join(__dirname, 'public');
 
-/**
- * Views config
- */
-app.set('views', path.join(__dirname, 'app/views'));
-app.set('view engine', 'ejs');
+const mimeTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2'
+};
 
-/**
- * Body parser
- */
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  let filePath = path.join(publicDir, url.pathname);
 
-/**
- * Static folders
- */
-app.use(express.static('public'));
-app.use('/uploads', express.static(__dirname + '/public/uploads'));
-
-/**
- * Session
- */
-
-let userSession = session({
-  resave: true,
-  key: 'express.sid',
-  store: sessionStore,
-  saveUninitialized: true,
-  secret: config.sessionSecret,
-  cookie: {
-    maxAge: 60 * 60 * 1000
+  if (filePath.endsWith(path.sep)) {
+    filePath = path.join(filePath, 'index.html');
   }
+
+  if (!filePath.startsWith(publicDir)) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+
+  fs.stat(filePath, (error, stats) => {
+    if (error || !stats.isFile()) {
+      serveFile(path.join(publicDir, 'index.html'), 'text/html; charset=utf-8', res);
+      return;
+    }
+
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    serveFile(filePath, contentType, res);
+  });
 });
-
-app.use(userSession);
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
-
-/**
- * Routes
- */
-app.use('/', routes);
-
-/**
- * 404 page
- */
-app.use((req, res, next) => {
-  res.status(404).sendFile(process.cwd() + '/app/views/404.htm');
-});
-
-/**
- * Socket
- */
-require('./app/socket/chat')(server, sessionStore);
 
 server.listen(port, () => {
-  console.log('Inited on: ', port);
+  console.log(`Codex running on port ${port}`);
 });
+
+function serveFile(filePath, contentType, res) {
+  fs.createReadStream(filePath)
+    .on('open', () => {
+      res.writeHead(200, { 'Content-Type': contentType });
+    })
+    .on('error', () => {
+      res.writeHead(500);
+      res.end('Internal Server Error');
+    })
+    .pipe(res);
+}
